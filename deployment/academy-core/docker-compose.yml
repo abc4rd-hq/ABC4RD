@@ -11,6 +11,7 @@ services:
       NOWPAYMENTS_IPN_URL: https://payments.abc4rd.org/v1/payments/nowpayments/ipn
       NOWPAYMENTS_SUCCESS_URL: https://payments.abc4rd.org/checkout/success
       NOWPAYMENTS_CANCEL_URL: https://payments.abc4rd.org/checkout/cancel
+      LEMONSQUEEZY_SUCCESS_URL: https://payments.abc4rd.org/checkout/success
     networks:
       - tutor
     volumes:

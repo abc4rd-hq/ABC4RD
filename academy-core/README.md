@@ -35,6 +35,10 @@ S3 или платёжного провайдера.
 - Добавлен sandbox-first адаптер NOWPayments: фиксированный invoice на `USD 1.00`,
   HMAC-SHA512-проверка IPN, отбрасывание промежуточных статусов и идемпотентная
   запись только `finished`/`refunded` в shadow ledger.
+- Добавлен Test-mode-first адаптер Lemon Squeezy Merchant of Record: API checkout
+  с фиксированной базовой ценой `USD 1.00`, проверка USD preview, HMAC-SHA256
+  подписи сырого webhook body, store/variant/mode gates и идемпотентные
+  `order_created`/полный `order_refunded`.
 - Будущий режим `LIVE` моделируется схемой, но по умолчанию заблокирован. Для
   записи live-наблюдений одновременно нужны явные provider и gate reference.
 - AI-first review: решение содержит `reviewer_agent_id`, модель и версию.
@@ -109,6 +113,20 @@ Webhook route `/v1/payments/nowpayments/ipn` по умолчанию отсут�
 callback не создаёт второй финансовый факт. До его публикации всё равно нужны
 DNS/TLS и sandbox credentials; API key этому входящему endpoint не передаётся.
 
+### Lemon Squeezy Merchant of Record
+
+`academy_core.payments.lemonsqueezy` создаёт API checkout только для заранее
+настроенных Store и Variant. `custom_price=100` означает базовую цену продукта
+`USD 1.00`; обязательный налог Merchant of Record может увеличить фактический
+итог покупателя и сохраняется отдельно в metadata, но не меняет цену курса в
+shadow ledger. Preview обязан подтвердить USD и subtotal `100` до возврата URL.
+
+Webhook `/v1/payments/lemonsqueezy/webhook` появляется только при одновременной
+настройке `LEMONSQUEEZY_WEBHOOK_SECRET`, Store и Variant. До записи он проверяет
+`X-Signature` над исходными байтами body, `X-Event-Name`, Test/Live mode, Store,
+Variant, валюту и базовую цену. PII покупателя из Order object в ledger не
+копируется. Частичный refund принимается, но не выдаётся за полный возврат.
+
 ## AI-first review и oversight outbox
 
 Первичное решение принимает актор `AI_AGENT`; `actor_ref` должен совпадать с
@@ -169,6 +187,8 @@ curl -sS -X POST http://127.0.0.1:8080/v1/identities \
 | `POST /v1/entitlements` | Записать решение доступа |
 | `POST /v1/events` | Принять минимальный интеграционный факт |
 | `POST /v1/payment-ledger` | Записать attempt или подтверждённое провайдером наблюдение |
+| `POST /v1/payments/lemonsqueezy/checkouts` | Закрыто создать Test-mode checkout Lemon Squeezy на $1 |
+| `POST /v1/payments/lemonsqueezy/webhook` | Принять подписанный order/refund webhook Lemon Squeezy |
 | `POST /v1/reviews` | Открыть AI-first review case |
 | `POST /v1/review-decisions` | Записать версионированное решение AI reviewer |
 | `POST /v1/credentials` | Зарегистрировать credential после AI approval |
