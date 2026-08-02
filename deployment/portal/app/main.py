@@ -9,9 +9,11 @@ import os
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+from urllib import error as urlerror
+from urllib import request as urlrequest
 
 import qrcode
-from flask import Flask, Response, abort, jsonify, render_template, request, send_file
+from flask import Flask, Response, abort, jsonify, make_response, render_template, request, send_file
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4, landscape
 from reportlab.pdfbase import pdfmetrics
@@ -22,9 +24,24 @@ from reportlab.pdfgen import canvas
 DATA_PATH = Path(os.environ.get("ABC4RD_PORTAL_DATA", "/app/data/state.json"))
 VERIFY_BASE_URL = os.environ.get("ABC4RD_VERIFY_BASE_URL", "https://verify.abc4rd.org").rstrip("/")
 SIGNING_KEY = os.environ.get("ABC4RD_CERTIFICATE_SIGNING_KEY", "")
+CORE_URL = os.environ.get("ABC4RD_CORE_URL", "http://abc4rd-academy-core:8080").rstrip("/")
+LIBRARY_ASSET_REF = "abc4rd-library:pilot-0001:v0.1"
+LIBRARY_COURSE_REF = "course-v1:ABC4RD+0001+2026"
 
 app = Flask(__name__)
 app.config.update(JSON_AS_ASCII=False)
+
+
+@app.after_request
+def security_headers(response: Response) -> Response:
+    response.headers.setdefault("X-Content-Type-Options", "nosniff")
+    response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+    response.headers.setdefault("X-Frame-Options", "DENY")
+    response.headers.setdefault(
+        "Permissions-Policy",
+        "camera=(), microphone=(), geolocation=(), payment=(), usb=()",
+    )
+    return response
 
 
 def _load_state() -> dict[str, Any]:
@@ -81,6 +98,51 @@ def _find_certificate(certificate_id: str) -> tuple[dict[str, Any], dict[str, An
             if isinstance(certificate, dict) and certificate.get("id") == certificate_id:
                 return participant, course
     return None
+
+
+def _library_content_sha256() -> str:
+    template = Path(app.root_path) / (app.template_folder or "templates") / "reader.html"
+    return hashlib.sha256(template.read_bytes()).hexdigest()
+
+
+def _has_library_access(participant: dict[str, Any]) -> bool:
+    return any(
+        course.get("course_ref") == LIBRARY_COURSE_REF
+        for course in participant.get("courses", [])
+        if isinstance(course, dict)
+    )
+
+
+def _record_library_access(participant: dict[str, Any]) -> None:
+    abc4rd_id = str(participant["abc4rd_id"])
+    access_day = datetime.now(timezone.utc).date().isoformat()
+    body = {
+        "event_type": "library.reader.accessed",
+        "aggregate_type": "library_asset",
+        "aggregate_ref": LIBRARY_ASSET_REF,
+        "source": "abc4rd-portal",
+        "actor_type": "PARTICIPANT",
+        "actor_ref": abc4rd_id,
+        "payload": {"abc4rd_id": abc4rd_id, "access_day": access_day},
+    }
+    encoded = json.dumps(body, separators=(",", ":"), sort_keys=True).encode("utf-8")
+    key_material = f"{abc4rd_id}:{LIBRARY_ASSET_REF}:{access_day}".encode("utf-8")
+    event_key = "portal-library-" + hashlib.sha256(key_material).hexdigest()
+    core_request = urlrequest.Request(
+        f"{CORE_URL}/v1/events",
+        data=encoded,
+        method="POST",
+        headers={
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "Idempotency-Key": event_key,
+        },
+    )
+    try:
+        with urlrequest.urlopen(core_request, timeout=3) as response:
+            response.read()
+    except (OSError, urlerror.URLError, urlerror.HTTPError) as exc:
+        app.logger.warning("library access audit unavailable: %s", type(exc).__name__)
 
 
 def _register_fonts() -> tuple[str, str]:
@@ -176,6 +238,7 @@ def dashboard() -> str:
         active=request.path.strip("/") or "home",
         academy_url="https://learn.abc4rd.org",
         messenger_url="https://chat.abc4rd.org",
+        identity_security_url="https://id.abc4rd.org/realms/abc4rd/account/#/security/signingin",
     )
 
 
@@ -188,9 +251,27 @@ def api_me() -> Response:
 
 
 @app.get("/library/pilot-0001")
-def library_reader() -> str:
+def library_reader() -> Response:
     participant = _current_participant()
-    return render_template("reader.html", participant=participant)
+    if participant is None or not _has_library_access(participant):
+        abort(403)
+    _record_library_access(participant)
+    rendered = render_template(
+        "reader.html",
+        participant=participant,
+        asset_ref=LIBRARY_ASSET_REF,
+        content_sha256=_library_content_sha256(),
+        accessed_at=datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+    )
+    response = make_response(rendered)
+    response.headers["Cache-Control"] = "private, no-store, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["X-Robots-Tag"] = "noindex, noarchive, nosnippet"
+    response.headers["Content-Security-Policy"] = (
+        "default-src 'none'; style-src 'self'; img-src 'self'; "
+        "base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
+    )
+    return response
 
 
 @app.get("/certificate/<certificate_id>.pdf")

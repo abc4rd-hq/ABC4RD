@@ -10,6 +10,7 @@ services:
     restart: unless-stopped
     environment:
       ABC4RD_CERTIFICATE_SIGNING_KEY: ${ABC4RD_CERTIFICATE_SIGNING_KEY:?required}
+      ABC4RD_CORE_URL: http://abc4rd-academy-core:8080
       ABC4RD_PORTAL_DATA: /app/data/state.json
       ABC4RD_VERIFY_BASE_URL: https://verify.abc4rd.org
     volumes:

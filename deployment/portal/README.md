@@ -10,6 +10,12 @@ technical-pilot PDF certificate only when the synchronized Open edX grade is
 passing. The PDF is explicitly not a state diploma or the future AI-reviewed
 Verifiable Credential.
 
+The pilot reader is authorization-gated by the synchronized course entitlement,
+adds a participant-specific visible mark, sends one idempotent access event per
+participant and UTC day to Academy Core, and returns private/no-store and
+no-index headers. This is accountable delivery, not DRM: screenshots or manual
+copying cannot be made impossible in a browser. The material's final license is
+intentionally shown as pending instead of being invented by the platform.
+
 Production secrets belong in `.env` with mode `600` and in 1Password. The
 public verification endpoint is served separately on `verify.abc4rd.org`.
-

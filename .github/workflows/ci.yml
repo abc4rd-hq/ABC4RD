@@ -22,6 +22,12 @@ jobs:
         run: python -m unittest discover -s tests -v
       - name: Test Digital Twin
         run: python -m unittest discover -s digital-twin/tests -v
+      - name: Test learner portal
+        run: |
+          python -m pip install -r deployment/portal/requirements.txt
+          PYTHONPATH=deployment/portal python -m unittest discover -s deployment/portal/tests -v
+      - name: Check Keycloak automation
+        run: bash -n deployment/keycloak/configure-passkeys.sh deployment/keycloak/configure-portal-clients.sh
       - name: Compile Tutor plugin
         run: python -m py_compile deployment/openedx/tutor-plugins/abc4rd.py
       - name: Check ERPNext deployment
