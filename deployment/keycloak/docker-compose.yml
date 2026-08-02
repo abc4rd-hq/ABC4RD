@@ -1,0 +1,96 @@
+name: abc4rd-identity
+
+services:
+  keycloak-db:
+    image: postgres:17.10-alpine
+    container_name: abc4rd-keycloak-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: ${KEYCLOAK_DB_PASSWORD:?KEYCLOAK_DB_PASSWORD is required}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keycloak -d keycloak"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    volumes:
+      - keycloak-postgres-data:/var/lib/postgresql/data
+    networks:
+      - identity
+    mem_limit: 1g
+    cpus: 1.0
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  keycloak:
+    build:
+      context: .
+      dockerfile: Containerfile
+      args:
+        KEYCLOAK_VERSION: 26.7.0
+    image: abc4rd/keycloak:26.7.0
+    container_name: abc4rd-keycloak
+    restart: unless-stopped
+    depends_on:
+      keycloak-db:
+        condition: service_healthy
+    command:
+      - start
+      - --optimized
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak-db:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD:?KEYCLOAK_DB_PASSWORD is required}
+      KC_HOSTNAME: https://id.abc4rd.org
+      KC_HTTP_ENABLED: "true"
+      KC_PROXY_HEADERS: xforwarded
+      KC_HEALTH_ENABLED: "true"
+      KC_METRICS_ENABLED: "true"
+      KC_HTTP_MAX_QUEUED_REQUESTS: "1000"
+    healthcheck:
+      test:
+        - CMD
+        - bash
+        - -ec
+        - >-
+          exec 3<>/dev/tcp/127.0.0.1/9000;
+          printf 'GET /health/ready HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n' >&3;
+          IFS= read -r status <&3;
+          [[ "$${status}" == HTTP/*" 200 "* ]]
+      interval: 20s
+      timeout: 5s
+      retries: 15
+      start_period: 60s
+    networks:
+      - identity
+      - tutor
+    mem_limit: 2g
+    cpus: 2.0
+    security_opt:
+      - no-new-privileges:true
+    stop_grace_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  keycloak-postgres-data:
+    name: abc4rd-keycloak-postgres-data
+
+networks:
+  identity:
+    name: abc4rd-identity-internal
+    internal: true
+  tutor:
+    external: true
+    name: tutor_local_default

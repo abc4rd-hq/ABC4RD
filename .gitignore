@@ -1,0 +1,24 @@
+# Secrets and runtime state
+.env
+.env.local
+*.local.env
+deployment/keycloak/.env
+
+# Private educational and operational materials
+course-factory/
+docs/
+backups/
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+
+# Editors and operating systems
+.DS_Store
+.idea/
+.vscode/

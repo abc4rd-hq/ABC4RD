@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "abc4rd-academy-core"
+version = "0.1.0"
+description = "Minimal ABC4RD Academy Control Plane core"
+requires-python = ">=3.9"
+dependencies = []
+
+[project.scripts]
+academy-core = "academy_core.__main__:main"
+
+[tool.setuptools]
+packages = ["academy_core"]
+
+[tool.setuptools.package-data]
+academy_core = ["schema/*.sql"]

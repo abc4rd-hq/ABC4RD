@@ -1,0 +1,71 @@
+{
+  "actions": [],
+  "creation": "2026-08-02 00:00:00.000000",
+  "doctype": "DocType",
+  "editable_grid": 1,
+  "engine": "InnoDB",
+  "field_order": [
+    "source_system",
+    "event_type",
+    "external_ref",
+    "occurred_at",
+    "verified_at",
+    "evidence_sha256"
+  ],
+  "fields": [
+    {
+      "fieldname": "source_system",
+      "fieldtype": "Select",
+      "in_list_view": 1,
+      "label": "Source System",
+      "options": "ACADEMY_CORE\nKEYCLOAK\nOPEN_EDX\nPAYMENT_PROVIDER\nS3\nMATRIX",
+      "reqd": 1
+    },
+    {
+      "fieldname": "event_type",
+      "fieldtype": "Data",
+      "in_list_view": 1,
+      "label": "Event Type",
+      "reqd": 1
+    },
+    {
+      "description": "Opaque identifier only; do not store an event payload or PII here.",
+      "fieldname": "external_ref",
+      "fieldtype": "Data",
+      "in_list_view": 1,
+      "label": "External Reference",
+      "reqd": 1
+    },
+    {
+      "fieldname": "occurred_at",
+      "fieldtype": "Datetime",
+      "label": "Occurred At",
+      "reqd": 1
+    },
+    {
+      "fieldname": "verified_at",
+      "fieldtype": "Datetime",
+      "label": "Verified At",
+      "reqd": 1
+    },
+    {
+      "description": "Optional lowercase SHA-256 of evidence stored outside ERPNext.",
+      "fieldname": "evidence_sha256",
+      "fieldtype": "Data",
+      "label": "Evidence SHA-256",
+      "length": 64
+    }
+  ],
+  "index_web_pages_for_search": 0,
+  "istable": 1,
+  "links": [],
+  "module": "ABC4RD CRM",
+  "modified": "2026-08-02 00:00:00.000000",
+  "modified_by": "Administrator",
+  "name": "ABC4RD Audit Reference",
+  "owner": "Administrator",
+  "permissions": [],
+  "sort_field": "idx",
+  "sort_order": "ASC",
+  "states": []
+}

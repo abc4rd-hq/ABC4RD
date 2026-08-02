@@ -1,0 +1,146 @@
+{
+  "actions": [],
+  "allow_import": 0,
+  "allow_rename": 0,
+  "autoname": "ABC4RD-INQ-.YYYY.-.#####",
+  "creation": "2026-08-02 00:00:00.000000",
+  "doctype": "DocType",
+  "engine": "InnoDB",
+  "field_order": [
+    "inquiry_section",
+    "participant",
+    "inquiry_kind",
+    "status",
+    "priority",
+    "inquiry_column",
+    "subject",
+    "description",
+    "assignment_section",
+    "responsible_actor_type",
+    "responsible_actor_ref",
+    "source_ref",
+    "audit_section",
+    "audit_references"
+  ],
+  "fields": [
+    {
+      "fieldname": "inquiry_section",
+      "fieldtype": "Section Break",
+      "label": "Inquiry"
+    },
+    {
+      "fieldname": "participant",
+      "fieldtype": "Link",
+      "in_list_view": 1,
+      "label": "Participant",
+      "options": "ABC4RD Participant",
+      "reqd": 1
+    },
+    {
+      "fieldname": "inquiry_kind",
+      "fieldtype": "Select",
+      "in_list_view": 1,
+      "label": "Inquiry Kind",
+      "options": "ADMISSIONS\nACCOUNT_ACCESS\nCOURSE_ACCESS\nFINANCIAL_ACCESS\nRESULT_REVIEW\nGENERAL_SUPPORT",
+      "reqd": 1
+    },
+    {
+      "default": "OPEN",
+      "fieldname": "status",
+      "fieldtype": "Select",
+      "in_list_view": 1,
+      "label": "Status",
+      "options": "OPEN\nIN_PROGRESS\nWAITING_FOR_PARTICIPANT\nWAITING_FOR_SERVICE\nRESOLVED\nCLOSED",
+      "reqd": 1
+    },
+    {
+      "default": "NORMAL",
+      "fieldname": "priority",
+      "fieldtype": "Select",
+      "label": "Priority",
+      "options": "LOW\nNORMAL\nHIGH\nURGENT",
+      "reqd": 1
+    },
+    {
+      "fieldname": "inquiry_column",
+      "fieldtype": "Column Break"
+    },
+    {
+      "description": "May contain PII; keep only in ERPNext and do not copy to Academy Core audit events.",
+      "fieldname": "subject",
+      "fieldtype": "Data",
+      "in_list_view": 1,
+      "label": "Subject",
+      "reqd": 1
+    },
+    {
+      "description": "May contain PII; keep only in ERPNext and do not copy to Academy Core audit events.",
+      "fieldname": "description",
+      "fieldtype": "Text Editor",
+      "label": "Description"
+    },
+    {
+      "fieldname": "assignment_section",
+      "fieldtype": "Section Break",
+      "label": "Responsible AI or Service"
+    },
+    {
+      "fieldname": "responsible_actor_type",
+      "fieldtype": "Select",
+      "label": "Responsible Actor Type",
+      "options": "AI_AGENT\nSERVICE",
+      "reqd": 1
+    },
+    {
+      "fieldname": "responsible_actor_ref",
+      "fieldtype": "Data",
+      "label": "Responsible Actor Reference",
+      "reqd": 1
+    },
+    {
+      "description": "Opaque reference to the originating channel or case; never message text or an email address.",
+      "fieldname": "source_ref",
+      "fieldtype": "Data",
+      "label": "Source Reference"
+    },
+    {
+      "fieldname": "audit_section",
+      "fieldtype": "Section Break",
+      "label": "Audit References"
+    },
+    {
+      "fieldname": "audit_references",
+      "fieldtype": "Table",
+      "label": "Audit References",
+      "options": "ABC4RD Audit Reference",
+      "read_only": 1
+    }
+  ],
+  "index_web_pages_for_search": 0,
+  "links": [],
+  "module": "ABC4RD CRM",
+  "modified": "2026-08-02 00:00:00.000000",
+  "modified_by": "Administrator",
+  "name": "ABC4RD Inquiry",
+  "owner": "Administrator",
+  "permissions": [
+    {
+      "create": 1,
+      "delete": 0,
+      "email": 0,
+      "export": 0,
+      "print": 0,
+      "read": 1,
+      "report": 1,
+      "role": "System Manager",
+      "share": 0,
+      "write": 1
+    }
+  ],
+  "search_fields": "participant,subject,status,responsible_actor_ref",
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "states": [],
+  "title_field": "subject",
+  "track_changes": 1
+}

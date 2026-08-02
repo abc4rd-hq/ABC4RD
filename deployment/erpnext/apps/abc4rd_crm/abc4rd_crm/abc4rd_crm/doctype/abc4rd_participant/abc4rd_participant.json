@@ -1,0 +1,302 @@
+{
+  "actions": [],
+  "allow_import": 0,
+  "allow_rename": 0,
+  "autoname": "field:abc4rd_id",
+  "creation": "2026-08-02 00:00:00.000000",
+  "doctype": "DocType",
+  "engine": "InnoDB",
+  "field_order": [
+    "identity_section",
+    "abc4rd_id",
+    "pilot_ref",
+    "identity_column",
+    "display_label",
+    "full_name",
+    "email",
+    "phone",
+    "locale",
+    "timezone",
+    "country_code",
+    "operations_section",
+    "lifecycle_state",
+    "lifecycle_source_ref",
+    "lifecycle_synced_at",
+    "lifecycle_audit_ref",
+    "operations_column",
+    "responsible_actor_type",
+    "responsible_actor_ref",
+    "financial_section",
+    "financial_state",
+    "financial_source_ref",
+    "financial_verified_at",
+    "financial_audit_ref",
+    "course_section",
+    "course_ref",
+    "course_synced_at",
+    "course_audit_ref",
+    "graduation_section",
+    "graduation_state",
+    "graduation_source_ref",
+    "graduation_verified_at",
+    "graduation_audit_ref",
+    "audit_section",
+    "audit_references"
+  ],
+  "fields": [
+    {
+      "fieldname": "identity_section",
+      "fieldtype": "Section Break",
+      "label": "Identity and CRM-only PII"
+    },
+    {
+      "fieldname": "abc4rd_id",
+      "fieldtype": "Data",
+      "in_list_view": 1,
+      "label": "ABC4RD ID",
+      "reqd": 1,
+      "unique": 1
+    },
+    {
+      "description": "Pilot profile reference such as PILOT-001; this is not the ABC4RD ID.",
+      "fieldname": "pilot_ref",
+      "fieldtype": "Data",
+      "label": "Pilot Reference"
+    },
+    {
+      "fieldname": "identity_column",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "display_label",
+      "fieldtype": "Data",
+      "in_list_view": 1,
+      "label": "Display Label",
+      "reqd": 1
+    },
+    {
+      "description": "PII stored only in ERPNext; never synchronize this value to Academy Core.",
+      "fieldname": "full_name",
+      "fieldtype": "Data",
+      "label": "Full Name"
+    },
+    {
+      "description": "PII stored only in ERPNext; never synchronize this value to Academy Core.",
+      "fieldname": "email",
+      "fieldtype": "Data",
+      "label": "Primary Email",
+      "options": "Email"
+    },
+    {
+      "description": "PII stored only in ERPNext; never synchronize this value to Academy Core.",
+      "fieldname": "phone",
+      "fieldtype": "Data",
+      "label": "Primary Phone",
+      "options": "Phone"
+    },
+    {
+      "description": "BCP 47 language tag; for example ru or en-US.",
+      "fieldname": "locale",
+      "fieldtype": "Data",
+      "label": "Preferred Locale"
+    },
+    {
+      "description": "IANA time zone; for example Europe/Istanbul.",
+      "fieldname": "timezone",
+      "fieldtype": "Data",
+      "label": "Time Zone"
+    },
+    {
+      "description": "ISO 3166-1 alpha-2 code when legitimately required.",
+      "fieldname": "country_code",
+      "fieldtype": "Data",
+      "label": "Country Code",
+      "length": 2
+    },
+    {
+      "fieldname": "operations_section",
+      "fieldtype": "Section Break",
+      "label": "Operational Lifecycle Mirror"
+    },
+    {
+      "default": "candidate",
+      "fieldname": "lifecycle_state",
+      "fieldtype": "Select",
+      "in_list_view": 1,
+      "label": "Lifecycle State",
+      "options": "candidate\nlearner\nintern\ngraduate\nresident",
+      "read_only": 1,
+      "reqd": 1
+    },
+    {
+      "fieldname": "lifecycle_source_ref",
+      "fieldtype": "Data",
+      "label": "Lifecycle Source Reference",
+      "read_only": 1,
+      "reqd": 1
+    },
+    {
+      "fieldname": "lifecycle_synced_at",
+      "fieldtype": "Datetime",
+      "label": "Lifecycle Synchronized At",
+      "read_only": 1,
+      "reqd": 1
+    },
+    {
+      "fieldname": "lifecycle_audit_ref",
+      "fieldtype": "Data",
+      "label": "Lifecycle Audit Reference",
+      "read_only": 1,
+      "reqd": 1
+    },
+    {
+      "fieldname": "operations_column",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "responsible_actor_type",
+      "fieldtype": "Select",
+      "label": "Responsible Actor Type",
+      "options": "AI_AGENT\nSERVICE",
+      "reqd": 1
+    },
+    {
+      "fieldname": "responsible_actor_ref",
+      "fieldtype": "Data",
+      "label": "Responsible Actor Reference",
+      "reqd": 1
+    },
+    {
+      "description": "Only a reconciled terminal fact from the payment/Core workflow is allowed here.",
+      "fieldname": "financial_section",
+      "fieldtype": "Section Break",
+      "label": "Reconciled Financial Fact"
+    },
+    {
+      "default": "NO_VERIFIED_FACT",
+      "fieldname": "financial_state",
+      "fieldtype": "Select",
+      "in_list_view": 1,
+      "label": "Financial State",
+      "options": "NO_VERIFIED_FACT\nSANDBOX_PAYMENT_RECONCILED\nSANDBOX_REFUND_RECONCILED\nSCHOLARSHIP_APPROVED",
+      "read_only": 1,
+      "reqd": 1
+    },
+    {
+      "fieldname": "financial_source_ref",
+      "fieldtype": "Data",
+      "label": "Financial Source Reference",
+      "read_only": 1
+    },
+    {
+      "fieldname": "financial_verified_at",
+      "fieldtype": "Datetime",
+      "label": "Financial Fact Verified At",
+      "read_only": 1
+    },
+    {
+      "fieldname": "financial_audit_ref",
+      "fieldtype": "Data",
+      "label": "Financial Audit Reference",
+      "read_only": 1
+    },
+    {
+      "description": "Only the Open edX course key and synchronization evidence; never grades, attempts or block completion.",
+      "fieldname": "course_section",
+      "fieldtype": "Section Break",
+      "label": "Course Reference"
+    },
+    {
+      "fieldname": "course_ref",
+      "fieldtype": "Data",
+      "in_list_view": 1,
+      "label": "Open edX Course Reference",
+      "read_only": 1
+    },
+    {
+      "fieldname": "course_synced_at",
+      "fieldtype": "Datetime",
+      "label": "Course Reference Synchronized At",
+      "read_only": 1
+    },
+    {
+      "fieldname": "course_audit_ref",
+      "fieldtype": "Data",
+      "label": "Course Audit Reference",
+      "read_only": 1
+    },
+    {
+      "fieldname": "graduation_section",
+      "fieldtype": "Section Break",
+      "label": "Graduation Mirror"
+    },
+    {
+      "default": "NO_VERIFIED_FACT",
+      "fieldname": "graduation_state",
+      "fieldtype": "Select",
+      "in_list_view": 1,
+      "label": "Graduation State",
+      "options": "NO_VERIFIED_FACT\nRELEASE_ELIGIBLE\nRELEASE_APPROVED\nRELEASE_DENIED\nRELEASED",
+      "read_only": 1,
+      "reqd": 1
+    },
+    {
+      "fieldname": "graduation_source_ref",
+      "fieldtype": "Data",
+      "label": "Graduation Source Reference",
+      "read_only": 1
+    },
+    {
+      "fieldname": "graduation_verified_at",
+      "fieldtype": "Datetime",
+      "label": "Graduation Fact Verified At",
+      "read_only": 1
+    },
+    {
+      "fieldname": "graduation_audit_ref",
+      "fieldtype": "Data",
+      "label": "Graduation Audit Reference",
+      "read_only": 1
+    },
+    {
+      "fieldname": "audit_section",
+      "fieldtype": "Section Break",
+      "label": "Additional Audit References"
+    },
+    {
+      "fieldname": "audit_references",
+      "fieldtype": "Table",
+      "label": "Audit References",
+      "options": "ABC4RD Audit Reference",
+      "read_only": 1
+    }
+  ],
+  "index_web_pages_for_search": 0,
+  "links": [],
+  "module": "ABC4RD CRM",
+  "modified": "2026-08-02 00:00:00.000000",
+  "modified_by": "Administrator",
+  "name": "ABC4RD Participant",
+  "naming_rule": "By fieldname",
+  "permissions": [
+    {
+      "create": 1,
+      "delete": 0,
+      "email": 0,
+      "export": 0,
+      "print": 0,
+      "read": 1,
+      "report": 1,
+      "role": "System Manager",
+      "share": 0,
+      "write": 1
+    }
+  ],
+  "owner": "Administrator",
+  "search_fields": "abc4rd_id,display_label,email",
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "states": [],
+  "title_field": "display_label",
+  "track_changes": 1
+}

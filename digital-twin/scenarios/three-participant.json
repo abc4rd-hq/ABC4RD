@@ -1,0 +1,177 @@
+{
+  "name": "ABC4RD minimal three-participant tokenomics twin",
+  "simulation_only": true,
+  "unit": "SIM",
+  "course_price": {
+    "currency": "USD",
+    "minor": 100,
+    "display": "USD 1.00"
+  },
+  "initial_treasury": 500,
+  "payment_gates": {
+    "legal_recipient_approved": false,
+    "provider_verified": false,
+    "sandbox_charge_passed": false,
+    "sandbox_refund_passed": false,
+    "webhook_idempotency_passed": false,
+    "reconciliation_passed": false,
+    "human_go_live_approved": false
+  },
+  "participants": [
+    "SYNTH-001",
+    "SYNTH-002",
+    "SYNTH-003"
+  ],
+  "events": [
+    {
+      "id": "evt-000-future-charge-readiness",
+      "type": "future_real_charge_readiness",
+      "participant_id": "SYNTH-001",
+      "currency": "USD",
+      "amount": 100,
+      "expect": "blocked"
+    },
+    {
+      "id": "evt-001-payment",
+      "type": "sandbox_payment",
+      "participant_id": "SYNTH-001",
+      "currency": "USD",
+      "amount": 100,
+      "expect": "applied"
+    },
+    {
+      "id": "evt-001-payment",
+      "type": "sandbox_payment",
+      "participant_id": "SYNTH-001",
+      "currency": "USD",
+      "amount": 100,
+      "expect": "duplicate"
+    },
+    {
+      "id": "evt-002-reward",
+      "type": "reward",
+      "participant_id": "SYNTH-001",
+      "amount": 12,
+      "expect": "applied"
+    },
+    {
+      "id": "evt-003-decline",
+      "type": "payment_decline",
+      "participant_id": "SYNTH-002",
+      "currency": "USD",
+      "amount": 100,
+      "expect": "declined"
+    },
+    {
+      "id": "evt-004-scholarship",
+      "type": "scholarship",
+      "participant_id": "SYNTH-002",
+      "amount": 100,
+      "expect": "applied"
+    },
+    {
+      "id": "evt-005-reward",
+      "type": "reward",
+      "participant_id": "SYNTH-002",
+      "amount": 8,
+      "expect": "applied"
+    },
+    {
+      "id": "evt-006-payment",
+      "type": "sandbox_payment",
+      "participant_id": "SYNTH-003",
+      "currency": "USD",
+      "amount": 100,
+      "expect": "applied"
+    },
+    {
+      "id": "evt-007-refund",
+      "type": "refund",
+      "participant_id": "SYNTH-003",
+      "payment_id": "evt-006-payment",
+      "currency": "USD",
+      "amount": 100,
+      "expect": "applied"
+    },
+    {
+      "id": "evt-007-reconciliation",
+      "type": "reconciliation",
+      "participant_id": "SYNTH-003",
+      "payment_id": "evt-006-payment",
+      "expected_gross_minor": 100,
+      "expected_refund_minor": 100,
+      "expected_net_minor": 0,
+      "expect": "reconciled"
+    },
+    {
+      "id": "evt-008-primary-review",
+      "type": "ai_primary_review",
+      "participant_id": "SYNTH-003",
+      "case_id": "CASE-SYNTH-003-REWARD-FARMING",
+      "review_id": "AI-PRIMARY-REVIEW-0001",
+      "reviewer_id": "AI-RISK-PRIMARY-V1",
+      "decision": "high_risk",
+      "expect": "applied"
+    },
+    {
+      "id": "evt-009-second-review",
+      "type": "ai_second_reconsideration",
+      "participant_id": "SYNTH-003",
+      "case_id": "CASE-SYNTH-003-REWARD-FARMING",
+      "review_id": "AI-SECOND-RECONSIDERATION-0001",
+      "reviewer_id": "AI-RISK-SECOND-V1",
+      "primary_review_id": "AI-PRIMARY-REVIEW-0001",
+      "independent": true,
+      "decision": "unresolved",
+      "expect": "applied"
+    },
+    {
+      "id": "evt-010-notification",
+      "type": "notification",
+      "participant_id": "SYNTH-003",
+      "case_id": "CASE-SYNTH-003-REWARD-FARMING",
+      "notification_id": "NOTIFICATION-0001",
+      "mailbox_id": "TBD_MAILBOX",
+      "delivery_mode": "record_only",
+      "expect": "applied"
+    },
+    {
+      "id": "evt-011-abuse",
+      "type": "abuse",
+      "participant_id": "SYNTH-003",
+      "case_id": "CASE-SYNTH-003-REWARD-FARMING",
+      "reason": "synthetic reward-farming signal",
+      "expect": "applied"
+    },
+    {
+      "id": "evt-012-blocked-reward",
+      "type": "reward",
+      "participant_id": "SYNTH-003",
+      "amount": 50,
+      "expect": "blocked"
+    },
+    {
+      "id": "evt-013-pause",
+      "type": "emergency_pause",
+      "reason": "synthetic incident drill",
+      "expect": "applied"
+    },
+    {
+      "id": "evt-014-blocked-payment",
+      "type": "sandbox_payment",
+      "participant_id": "SYNTH-001",
+      "currency": "USD",
+      "amount": 100,
+      "expect": "blocked"
+    },
+    {
+      "id": "evt-015-protective-refund",
+      "type": "refund",
+      "participant_id": "SYNTH-001",
+      "payment_id": "evt-001-payment",
+      "currency": "USD",
+      "amount": 100,
+      "expect": "applied"
+    }
+  ]
+}

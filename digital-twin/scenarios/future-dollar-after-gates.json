@@ -1,0 +1,62 @@
+{
+  "name": "ABC4RD counterfactual USD 1.00 transition after all payment gates",
+  "simulation_only": true,
+  "unit": "SIM",
+  "course_price": {
+    "currency": "USD",
+    "minor": 100,
+    "display": "USD 1.00"
+  },
+  "initial_treasury": 500,
+  "payment_gates": {
+    "legal_recipient_approved": true,
+    "provider_verified": true,
+    "sandbox_charge_passed": true,
+    "sandbox_refund_passed": true,
+    "webhook_idempotency_passed": true,
+    "reconciliation_passed": true,
+    "human_go_live_approved": true
+  },
+  "participants": [
+    "SYNTH-001",
+    "SYNTH-002",
+    "SYNTH-003"
+  ],
+  "events": [
+    {
+      "id": "future-001-readiness",
+      "type": "future_real_charge_readiness",
+      "participant_id": "SYNTH-001",
+      "currency": "USD",
+      "amount": 100,
+      "expect": "ready"
+    },
+    {
+      "id": "future-002-charge-simulation",
+      "type": "future_real_charge_simulation",
+      "participant_id": "SYNTH-001",
+      "currency": "USD",
+      "amount": 100,
+      "expect": "applied"
+    },
+    {
+      "id": "future-003-refund-simulation",
+      "type": "refund",
+      "participant_id": "SYNTH-001",
+      "payment_id": "future-002-charge-simulation",
+      "currency": "USD",
+      "amount": 100,
+      "expect": "applied"
+    },
+    {
+      "id": "future-004-reconciliation",
+      "type": "reconciliation",
+      "participant_id": "SYNTH-001",
+      "payment_id": "future-002-charge-simulation",
+      "expected_gross_minor": 100,
+      "expected_refund_minor": 100,
+      "expected_net_minor": 0,
+      "expect": "reconciled"
+    }
+  ]
+}

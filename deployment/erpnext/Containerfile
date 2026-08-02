@@ -1,0 +1,15 @@
+ARG ERPNEXT_BASE_IMAGE=frappe/erpnext:v16.30.0@sha256:5349ec895be64617d1b0060d6dde0740592fa65eca266f8eb5e26bd3e73e2126
+FROM ${ERPNEXT_BASE_IMAGE}
+
+USER root
+
+COPY --chown=frappe:frappe apps/abc4rd_crm /home/frappe/frappe-bench/apps/abc4rd_crm
+COPY --chmod=0755 container/bootstrap-site.sh /usr/local/bin/abc4rd-bootstrap-site
+
+RUN site_packages="$(/home/frappe/frappe-bench/env/bin/python -c 'import site; print(site.getsitepackages()[0])')" \
+    && printf '%s\n' '/home/frappe/frappe-bench/apps/abc4rd_crm' > "${site_packages}/abc4rd_crm.pth" \
+    && /home/frappe/frappe-bench/env/bin/python -c \
+      'import abc4rd_crm; assert abc4rd_crm.__version__ == "0.1.0"'
+
+USER frappe
+WORKDIR /home/frappe/frappe-bench

@@ -1,0 +1,20 @@
+# Mandatory override for every restore-drill command. It prevents the restored
+# frontend (and its PII) from joining the production Tutor/Caddy network.
+services:
+  frontend:
+    profiles: ["restore-drill-frontend-disabled"]
+  queue-short:
+    profiles: ["restore-drill-workers-disabled"]
+  queue-long:
+    profiles: ["restore-drill-workers-disabled"]
+  scheduler:
+    profiles: ["restore-drill-workers-disabled"]
+
+networks:
+  egress:
+    internal: true
+    name: ${ERPNEXT_RESOURCE_PREFIX:-unsafe-missing-restore-prefix}-egress
+  tutor:
+    external: false
+    internal: true
+    name: ${ERPNEXT_RESOURCE_PREFIX:-unsafe-missing-restore-prefix}-proxy-disabled

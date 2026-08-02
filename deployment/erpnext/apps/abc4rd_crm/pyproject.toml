@@ -1,0 +1,25 @@
+[project]
+name = "abc4rd_crm"
+authors = [
+    { name = "ABC4RD Academy" }
+]
+description = "Minimal operational CRM projection for ABC4RD Academy"
+requires-python = ">=3.14"
+readme = "README.md"
+license = { text = "AGPL-3.0-or-later" }
+dynamic = ["version"]
+dependencies = []
+
+[build-system]
+requires = ["flit_core >=3.4,<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.bench.frappe-dependencies]
+frappe = ">=16.0.0,<17.0.0"
+
+[tool.ruff]
+line-length = 110
+target-version = "py314"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "RUF"]
