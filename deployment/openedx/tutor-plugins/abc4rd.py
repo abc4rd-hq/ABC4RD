@@ -50,6 +50,11 @@ payments.abc4rd.org{$default_site_port} {
             header_up X-Forwarded-Port 443
         }
 
+        @lemonsqueezy_webhook path /v1/payments/lemonsqueezy/webhook
+        reverse_proxy @lemonsqueezy_webhook "abc4rd-academy-core:8080" {
+            header_up X-Forwarded-Port 443
+        }
+
         @checkout_result path /checkout/success /checkout/cancel
         redir @checkout_result https://learn.abc4rd.org/dashboard 303
 

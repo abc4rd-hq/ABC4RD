@@ -24,6 +24,7 @@ def main() -> None:
         "--nowpayments-ipn-secret-env", default="NOWPAYMENTS_IPN_SECRET"
     )
     serve_parser.add_argument("--nowpayments-live", action="store_true")
+    serve_parser.add_argument("--lemonsqueezy-live", action="store_true")
 
     verify_parser = subparsers.add_parser("verify-audit", help="verify the audit hash chain")
     verify_parser.add_argument("--db", default="var/academy-core.db")
@@ -59,6 +60,17 @@ def main() -> None:
         nowpayments_cancel_url=os.environ.get(
             "NOWPAYMENTS_CANCEL_URL",
             "https://payments.abc4rd.org/checkout/cancel",
+        ),
+        lemonsqueezy_webhook_secret=os.environ.get(
+            "LEMONSQUEEZY_WEBHOOK_SECRET"
+        ),
+        lemonsqueezy_test_mode=not args.lemonsqueezy_live,
+        lemonsqueezy_api_key=os.environ.get("LEMONSQUEEZY_API_KEY"),
+        lemonsqueezy_store_id=os.environ.get("LEMONSQUEEZY_STORE_ID"),
+        lemonsqueezy_variant_id=os.environ.get("LEMONSQUEEZY_VARIANT_ID"),
+        lemonsqueezy_success_url=os.environ.get(
+            "LEMONSQUEEZY_SUCCESS_URL",
+            "https://payments.abc4rd.org/checkout/success",
         ),
     )
     with make_server(args.host, args.port, application) as server:
