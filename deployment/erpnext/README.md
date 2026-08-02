@@ -1,12 +1,22 @@
 # ABC4RD ERPNext CRM — production preparation
 
-Статус: `PREPARED / NOT DEPLOYED`
+Статус: `DEPLOYED / RUNTIME VERIFIED`
 
 Дата сверки: `2026-08-02`
 
-Каталог готовит, но не запускает ERPNext CRM. Никаких действий на VPS из этой
-подготовки не выполнялось. Реальный запуск разрешён только после подтверждения
-Keycloak, Open edX SSO, свободных ресурсов и плана внешних резервных копий.
+Production-развёртывание выполнено на VPS `vps-11b90ce5` после проверки Keycloak,
+Open edX SSO и ресурсов. Публичный адрес: `https://crm.abc4rd.org`.
+
+Readback от `2026-08-02`:
+
+- ERPNext `16.30.0`, Frappe `16.29.0`, `abc4rd_crm` `0.1.0`;
+- девять обязательных runtime-сервисов работают, все healthcheck проходят;
+- три ABC4RD DocType установлены и прочитаны из production-сайта;
+- DNS, TLS, Caddy route и публичный `/api/method/ping` проверены;
+- создан штатный логический backup и проверена его зашифрованная off-host копия.
+
+ERPNext пока использует собственный административный вход. Его SSO с Keycloak —
+отдельный следующий gate; наличие SSO Open edX нельзя считать SSO ERPNext.
 
 ## Что подготовлено
 
@@ -49,7 +59,7 @@ cd /Users/dom/Documents/ABC4RD/deployment/erpnext
 проверяет инварианты схемы и выполняет `docker compose config`, если Compose
 доступен.
 
-## Последовательный запуск — только после отдельного разрешения
+## Runbook последовательного развёртывания
 
 1. Скопировать этот каталог в `/opt/abc4rd/erpnext`.
 2. Создать `/opt/abc4rd/erpnext/.env` из `.env.example`.
@@ -83,8 +93,8 @@ cd /Users/dom/Documents/ABC4RD/deployment/erpnext
      /opt/abc4rd/erpnext/scripts/check-ready.sh
    ```
 
-Команды выше — инструкция для будущего последовательного окна работ, а не отчёт о
-выполненной установке.
+Команды выше остаются runbook для повторного или нового последовательного окна
+работ. Фактический production-статус зафиксирован в readback в начале документа.
 
 ## Backup
 
