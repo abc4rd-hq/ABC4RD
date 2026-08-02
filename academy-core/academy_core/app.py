@@ -1,9 +1,15 @@
+import hmac
 import json
 from typing import Any, Callable, Dict, Iterable, Optional, Tuple
 from urllib.parse import parse_qs
 
-from .errors import CoreError, ValidationError
-from .payments.nowpayments import process_ipn
+from .errors import AuthenticationError, CoreError, ValidationError
+from .payments.nowpayments import (
+    NowPaymentsClient,
+    NowPaymentsError,
+    Transport,
+    process_ipn,
+)
 from .service import AcademyCore
 
 
@@ -51,6 +57,12 @@ def create_app(
     live_payment_gate_ref: Optional[str] = None,
     nowpayments_ipn_secret: Optional[str] = None,
     nowpayments_sandbox: bool = True,
+    nowpayments_api_key: Optional[str] = None,
+    nowpayments_checkout_token: Optional[str] = None,
+    nowpayments_ipn_url: str = "https://payments.abc4rd.org/v1/payments/nowpayments/ipn",
+    nowpayments_success_url: str = "https://payments.abc4rd.org/checkout/success",
+    nowpayments_cancel_url: str = "https://payments.abc4rd.org/checkout/cancel",
+    nowpayments_transport: Optional[Transport] = None,
 ) -> Callable:
     core = AcademyCore(database, live_payment_provider, live_payment_gate_ref)
     if nowpayments_ipn_secret is not None:
@@ -61,6 +73,16 @@ def create_app(
         raise ValidationError(
             "LIVE NOWPayments IPN requires live_payment_provider=nowpayments"
         )
+    checkout_values = (nowpayments_api_key, nowpayments_checkout_token)
+    if any(value is not None for value in checkout_values) and not all(
+        isinstance(value, str) and value.strip() for value in checkout_values
+    ):
+        raise ValidationError(
+            "NOWPayments checkout requires both API key and checkout token"
+        )
+    if nowpayments_api_key is not None:
+        nowpayments_api_key = nowpayments_api_key.strip()
+        nowpayments_checkout_token = nowpayments_checkout_token.strip()
     writes: Dict[Tuple[str, str], Callable] = {
         ("POST", "/v1/identities"): core.create_identity,
         ("POST", "/v1/consents"): core.record_consent,
@@ -105,6 +127,38 @@ def create_app(
                 )
             if (
                 method == "POST"
+                and path == "/v1/payments/nowpayments/invoices"
+                and nowpayments_api_key is not None
+                and nowpayments_checkout_token is not None
+            ):
+                supplied = environ.get("HTTP_AUTHORIZATION", "")
+                prefix = "Bearer "
+                if not supplied.startswith(prefix) or not hmac.compare_digest(
+                    supplied[len(prefix) :], nowpayments_checkout_token
+                ):
+                    raise AuthenticationError("invalid checkout authorization")
+                body = _read_json(environ)
+                unknown = sorted(set(body) - {"order_id", "pay_currency"})
+                if unknown:
+                    raise ValidationError(
+                        "unknown fields: %s" % ", ".join(unknown)
+                    )
+                client = NowPaymentsClient(
+                    nowpayments_api_key,
+                    sandbox=nowpayments_sandbox,
+                    allow_live=not nowpayments_sandbox,
+                    transport=nowpayments_transport,
+                )
+                invoice = client.create_pilot_invoice(
+                    order_id=body.get("order_id"),
+                    pay_currency=body.get("pay_currency"),
+                    ipn_callback_url=nowpayments_ipn_url,
+                    success_url=nowpayments_success_url,
+                    cancel_url=nowpayments_cancel_url,
+                )
+                return _json_response(start_response, "201 Created", invoice)
+            if (
+                method == "POST"
                 and path == "/v1/payments/nowpayments/ipn"
                 and nowpayments_ipn_secret is not None
             ):
@@ -143,6 +197,12 @@ def create_app(
                 start_response,
                 "%d %s" % (error.status_code, _reason(error.status_code)),
                 {"error": labels.get(error.status_code, "core_error"), "message": str(error)},
+            )
+        except NowPaymentsError as error:
+            return _json_response(
+                start_response,
+                "502 Bad Gateway",
+                {"error": "payment_provider_error", "message": str(error)},
             )
         except Exception:
             return _json_response(

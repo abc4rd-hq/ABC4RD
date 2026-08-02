@@ -42,6 +42,18 @@ id.abc4rd.org{$default_site_port} {
 
     import proxy "abc4rd-keycloak:8080"
 }
+
+payments.abc4rd.org{$default_site_port} {
+    @webhook path /v1/payments/nowpayments/ipn
+    handle @webhook {
+        import proxy "abc4rd-academy-core:8080"
+    }
+
+    @checkout_result path /checkout/success /checkout/cancel
+    redir @checkout_result https://learn.abc4rd.org/dashboard 303
+
+    respond 404
+}
 """.strip(),
     )
 )

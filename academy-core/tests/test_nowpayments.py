@@ -64,7 +64,7 @@ class NowPaymentsClientTest(unittest.TestCase):
         client = NowPaymentsClient("sandbox-api-key", transport=transport)
         invoice = client.create_pilot_invoice(
             order_id="pilot-order-1",
-            ipn_callback_url="https://payments.abc4rd.org/v1/nowpayments/ipn",
+            ipn_callback_url="https://payments.abc4rd.org/v1/payments/nowpayments/ipn",
             success_url="https://learn.abc4rd.org/payment/success",
             cancel_url="https://learn.abc4rd.org/payment/cancel",
             pay_currency="usdcbase",
@@ -226,6 +226,79 @@ class NowPaymentsIpnApiTest(unittest.TestCase):
         app = create_app(self.database)
         payload = finished_payload()
         status, body = self.call(app, payload, signature(payload))
+        self.assertEqual(status, "404 Not Found")
+        self.assertEqual(body["error"], "not_found")
+
+
+class NowPaymentsInvoiceApiTest(unittest.TestCase):
+    def setUp(self):
+        self.temporary = tempfile.TemporaryDirectory()
+        self.database = str(Path(self.temporary.name) / "core.db")
+
+    def tearDown(self):
+        self.temporary.cleanup()
+
+    def call(self, app, payload, token="internal-checkout-token"):
+        raw = json.dumps(payload).encode("utf-8")
+        environ = {}
+        setup_testing_defaults(environ)
+        environ.update(
+            REQUEST_METHOD="POST",
+            PATH_INFO="/v1/payments/nowpayments/invoices",
+            CONTENT_TYPE="application/json",
+            CONTENT_LENGTH=str(len(raw)),
+            HTTP_AUTHORIZATION="Bearer %s" % token,
+            **{"wsgi.input": io.BytesIO(raw)},
+        )
+        captured = {}
+
+        def start_response(status, headers):
+            captured["status"] = status
+
+        response = b"".join(app(environ, start_response))
+        return captured["status"], json.loads(response.decode("utf-8"))
+
+    def configured_app(self):
+        def transport(method, url, headers, body, timeout):
+            self.request = json.loads(body.decode("utf-8"))
+            return {
+                "id": 987,
+                "invoice_url": "https://sandbox.nowpayments.io/payment/?iid=987",
+            }
+
+        return create_app(
+            self.database,
+            nowpayments_api_key="sandbox-api-key",
+            nowpayments_checkout_token="internal-checkout-token",
+            nowpayments_transport=transport,
+        )
+
+    def test_internal_checkout_creates_fixed_one_dollar_invoice(self):
+        status, body = self.call(
+            self.configured_app(),
+            {"order_id": "opaque-order-123", "pay_currency": "usdcbase"},
+        )
+        self.assertEqual(status, "201 Created")
+        self.assertEqual(body["amount_minor"], 100)
+        self.assertEqual(body["currency"], "USD")
+        self.assertTrue(body["sandbox"])
+        self.assertEqual(self.request["price_amount"], "1.00")
+        self.assertEqual(
+            self.request["ipn_callback_url"],
+            "https://payments.abc4rd.org/v1/payments/nowpayments/ipn",
+        )
+
+    def test_checkout_requires_internal_bearer_token(self):
+        status, body = self.call(
+            self.configured_app(), {"order_id": "opaque-order-123"}, token="wrong"
+        )
+        self.assertEqual(status, "401 Unauthorized")
+        self.assertEqual(body["error"], "unauthorized")
+
+    def test_checkout_route_is_absent_without_provider_credentials(self):
+        status, body = self.call(
+            create_app(self.database), {"order_id": "opaque-order-123"}
+        )
         self.assertEqual(status, "404 Not Found")
         self.assertEqual(body["error"], "not_found")
 

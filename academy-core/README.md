@@ -4,8 +4,8 @@
 проверяемый маршрут пилота, но не заменяет Open edX, Keycloak, ERPNext, Matrix,
 S3 или платёжного провайдера.
 
-Статус: `PROTOTYPE / NO PAYMENT SETTLEMENT`. Каркас не подключён к VPS и
-внешним системам. По умолчанию разрешены только sandbox-записи.
+Статус: `SANDBOX-READY / NO LIVE PAYMENT SETTLEMENT`. Контейнерное развёртывание
+подготовлено; по умолчанию разрешены только sandbox-записи.
 
 ## Граница ответственности
 
@@ -97,7 +97,7 @@ from academy_core.payments import NowPaymentsClient
 client = NowPaymentsClient(api_key="read-from-secret-manager")
 invoice = client.create_pilot_invoice(
     order_id="opaque-order-uuid",
-    ipn_callback_url="https://payments.abc4rd.org/v1/nowpayments/ipn",
+    ipn_callback_url="https://payments.abc4rd.org/v1/payments/nowpayments/ipn",
     success_url="https://learn.abc4rd.org/payment/success",
     cancel_url="https://learn.abc4rd.org/payment/cancel",
 )
