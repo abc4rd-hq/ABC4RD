@@ -36,6 +36,14 @@ hooks.Filters.ENV_PATCHES.add_item(
     (
         "caddyfile",
         """
+abc4rd.org{$default_site_port} {
+    tls internal
+    @matrix_server_well_known path /.well-known/matrix/server
+    header @matrix_server_well_known Content-Type application/json
+    respond @matrix_server_well_known `{"m.server":"matrix.abc4rd.org:443"}` 200
+    respond 404
+}
+
 id.abc4rd.org{$default_site_port} {
     @blocked path /admin* /realms/master* /metrics* /health*
     respond @blocked 404
@@ -97,7 +105,42 @@ matrix.abc4rd.org{$default_site_port} {
         X-Content-Type-Options nosniff
         Referrer-Policy no-referrer
     }
-    import proxy "abc4rd-synapse:8008"
+    route {
+        @matrix_client_well_known path /.well-known/matrix/client
+        handle @matrix_client_well_known {
+            header Content-Type application/json
+            header Access-Control-Allow-Origin *
+            respond `{"m.homeserver":{"base_url":"https://matrix.abc4rd.org"},"org.matrix.msc4143.rtc_foci":[{"type":"livekit","livekit_service_url":"https://matrix.abc4rd.org/livekit/jwt"}]}` 200
+        }
+
+        @matrix_rtc_auth path /livekit/jwt /livekit/jwt/*
+        handle @matrix_rtc_auth {
+            uri strip_prefix /livekit/jwt
+            reverse_proxy "abc4rd-lk-jwt:8080" {
+                header_up Host {host}
+                header_up X-Forwarded-Server {host}
+                header_up X-Real-IP {remote_host}
+                header_up X-Forwarded-For {remote_host}
+            }
+        }
+
+        @matrix_rtc_sfu path /livekit/sfu /livekit/sfu/*
+        handle @matrix_rtc_sfu {
+            uri strip_prefix /livekit/sfu
+            reverse_proxy "abc4rd-livekit:7880" {
+                header_up Host {host}
+                header_up X-Forwarded-Server {host}
+                header_up X-Real-IP {remote_host}
+                header_up X-Forwarded-For {remote_host}
+            }
+        }
+
+        handle {
+            reverse_proxy "abc4rd-synapse:8008" {
+                header_up X-Forwarded-Port 443
+            }
+        }
+    }
 }
 """.strip(),
     )

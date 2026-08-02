@@ -1,5 +1,6 @@
 .env
 data/
 postgres/
+rtc-redis/
 config/homeserver.yaml
-
+config/livekit.yaml

@@ -4,7 +4,13 @@
     "m.homeserver": {
       "base_url": "https://matrix.abc4rd.org",
       "server_name": "abc4rd.org"
-    }
+    },
+    "org.matrix.msc4143.rtc_foci": [
+      {
+        "type": "livekit",
+        "livekit_service_url": "https://matrix.abc4rd.org/livekit/jwt"
+      }
+    ]
   },
   "disable_custom_urls": true,
   "disable_guests": true,
@@ -12,6 +18,35 @@
   "disable_login_language_selector": false,
   "default_theme": "dark",
   "default_country_code": "US",
+  "default_federate": false,
+  "default_device_display_name": "ABC4RD Web",
+  "permalink_prefix": "https://chat.abc4rd.org",
+  "element_call": {
+    "use_exclusively": true,
+    "disabled": false,
+    "brand": "ABC4RD Calls"
+  },
+  "sso_redirect_options": {
+    "immediate": false,
+    "on_welcome_page": true,
+    "on_login_page": true
+  },
+  "branding": {
+    "welcome_background_url": "https://chat.abc4rd.org/branding/background.svg",
+    "auth_header_logo_url": "https://chat.abc4rd.org/branding/abc4rd-logo.svg",
+    "logo_link_url": "https://abc4rd.org",
+    "auth_footer_links": [
+      {
+        "text": "Академия",
+        "url": "https://learn.abc4rd.org"
+      },
+      {
+        "text": "Личный кабинет",
+        "url": "https://app.abc4rd.org"
+      }
+    ]
+  },
+  "mobile_guide_toast": false,
   "room_directory": {
     "servers": ["abc4rd.org"]
   },
@@ -21,4 +56,3 @@
   "show_labs_settings": false,
   "features": {}
 }
-

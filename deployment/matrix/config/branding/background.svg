@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" role="img" aria-label="ABC4RD messenger background">
+  <defs>
+    <linearGradient id="base" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#080b18"/>
+      <stop offset="0.52" stop-color="#101632"/>
+      <stop offset="1" stop-color="#0a1025"/>
+    </linearGradient>
+    <radialGradient id="violet" cx="0" cy="0" r="1" gradientTransform="translate(410 280) rotate(34) scale(720 640)">
+      <stop stop-color="#7456ff" stop-opacity=".52"/>
+      <stop offset="1" stop-color="#7456ff" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="cyan" cx="0" cy="0" r="1" gradientTransform="translate(1570 790) rotate(200) scale(660 540)">
+      <stop stop-color="#23c8ff" stop-opacity=".33"/>
+      <stop offset="1" stop-color="#23c8ff" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="64" height="64" patternUnits="userSpaceOnUse">
+      <path d="M64 0H0v64" fill="none" stroke="#bac3ee" stroke-opacity=".055"/>
+    </pattern>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#base)"/>
+  <rect width="1920" height="1080" fill="url(#violet)"/>
+  <rect width="1920" height="1080" fill="url(#cyan)"/>
+  <rect width="1920" height="1080" fill="url(#grid)"/>
+  <g fill="none" stroke="#cbd2ff" stroke-opacity=".10">
+    <path d="M1420 95 1800 475l-380 380-380-380z" stroke-width="2"/>
+    <path d="m1490 475 120-120 120 120-120 120z" stroke-width="4"/>
+  </g>
+</svg>

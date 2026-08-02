@@ -34,7 +34,10 @@ for container in \
   abc4rd-portal-auth \
   abc4rd-matrix-db \
   abc4rd-synapse \
-  abc4rd-element
+  abc4rd-element \
+  abc4rd-rtc-redis \
+  abc4rd-livekit \
+  abc4rd-lk-jwt
 do
   check_container "$container"
 done
@@ -48,6 +51,15 @@ check_http verification "https://verify.abc4rd.org/health" "200"
 check_http library "https://library.abc4rd.org/" "302"
 check_http messenger "https://chat.abc4rd.org/config.json" "200"
 check_http matrix "https://matrix.abc4rd.org/_matrix/client/versions" "200"
+check_http matrix-discovery "https://matrix.abc4rd.org/.well-known/matrix/client" "200"
+check_http matrix-rtc-auth "https://matrix.abc4rd.org/livekit/jwt/healthz" "200"
+
+if ! ss -lnt | grep -q ':7881 '; then
+  failures+=("port:livekit-tcp:closed")
+fi
+if ! ss -lnu | grep -q ':7882 '; then
+  failures+=("port:livekit-udp:closed")
+fi
 
 state_file=/opt/abc4rd/portal/data/state.json
 participant_count=0

@@ -50,6 +50,7 @@ services:
     restart: unless-stopped
     volumes:
       - ./config/element-config.json:/app/config.json:ro
+      - ./config/branding:/app/branding:ro
     networks:
       - academy
     healthcheck:
@@ -68,6 +69,67 @@ services:
       - SETGID
       - SETUID
 
+  rtc-redis:
+    image: redis:8.2-alpine
+    container_name: abc4rd-rtc-redis
+    restart: unless-stopped
+    command: ["redis-server", "--save", "60", "1", "--loglevel", "warning"]
+    volumes:
+      - ./rtc-redis:/data
+    networks:
+      - rtc
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    security_opt:
+      - no-new-privileges:true
+
+  livekit:
+    image: livekit/livekit-server:v1.13.5
+    container_name: abc4rd-livekit
+    restart: unless-stopped
+    depends_on:
+      rtc-redis:
+        condition: service_healthy
+    command: ["--config", "/etc/livekit.yaml"]
+    volumes:
+      - ./config/livekit.yaml:/etc/livekit.yaml:ro
+    ports:
+      - "7881:7881/tcp"
+      - "7882:7882/udp"
+    networks:
+      - rtc
+      - academy
+    security_opt:
+      - no-new-privileges:true
+
+  lk-jwt:
+    image: ghcr.io/element-hq/lk-jwt-service:0.5.0
+    container_name: abc4rd-lk-jwt
+    restart: unless-stopped
+    depends_on:
+      rtc-redis:
+        condition: service_healthy
+      livekit:
+        condition: service_started
+    environment:
+      LIVEKIT_URL: wss://matrix.abc4rd.org/livekit/sfu
+      LIVEKIT_KEY: ${ABC4RD_LIVEKIT_KEY:?required}
+      LIVEKIT_SECRET: ${ABC4RD_LIVEKIT_SECRET:?required}
+      LIVEKIT_FULL_ACCESS_HOMESERVERS: abc4rd.org
+      SSL_CERT_FILE: /etc/ssl/certs/abc4rd-caddy-root.crt
+    extra_hosts:
+      - "abc4rd.org:51.68.130.137"
+    volumes:
+      - /opt/abc4rd/tutor/data/caddy/caddy/pki/authorities/local/root.crt:/etc/ssl/certs/abc4rd-caddy-root.crt:ro
+    networks:
+      - rtc
+      - academy
+    security_opt:
+      - no-new-privileges:true
+
 networks:
   matrix:
     name: abc4rd-matrix-internal
@@ -75,3 +137,6 @@ networks:
   academy:
     external: true
     name: tutor_local_default
+  rtc:
+    name: abc4rd-rtc-internal
+    internal: true
