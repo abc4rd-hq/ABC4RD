@@ -56,6 +56,10 @@ payments.abc4rd.org{$default_site_port} {
         respond 404
     }
 }
+
+crm.abc4rd.org{$default_site_port} {
+    import proxy "abc4rd-erpnext-frontend:8080"
+}
 """.strip(),
     )
 )
