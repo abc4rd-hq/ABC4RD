@@ -1,4 +1,5 @@
 import argparse
+import os
 from wsgiref.simple_server import make_server
 
 from .app import create_app
@@ -19,6 +20,10 @@ def main() -> None:
     serve_parser.add_argument("--port", type=int, default=8080)
     serve_parser.add_argument("--live-payment-provider")
     serve_parser.add_argument("--live-payment-gate-ref")
+    serve_parser.add_argument(
+        "--nowpayments-ipn-secret-env", default="NOWPAYMENTS_IPN_SECRET"
+    )
+    serve_parser.add_argument("--nowpayments-live", action="store_true")
 
     verify_parser = subparsers.add_parser("verify-audit", help="verify the audit hash chain")
     verify_parser.add_argument("--db", default="var/academy-core.db")
@@ -34,8 +39,13 @@ def main() -> None:
             result["valid"], result.get("entries", 0), result.get("head_hash", "")))
         raise SystemExit(0 if result["valid"] else 1)
 
+    ipn_secret = os.environ.get(args.nowpayments_ipn_secret_env)
     application = create_app(
-        args.db, args.live_payment_provider, args.live_payment_gate_ref
+        args.db,
+        args.live_payment_provider,
+        args.live_payment_gate_ref,
+        nowpayments_ipn_secret=ipn_secret,
+        nowpayments_sandbox=not args.nowpayments_live,
     )
     with make_server(args.host, args.port, application) as server:
         print(

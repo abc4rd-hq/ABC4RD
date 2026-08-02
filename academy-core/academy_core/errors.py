@@ -8,6 +8,10 @@ class ValidationError(CoreError):
     status_code = 422
 
 
+class AuthenticationError(CoreError):
+    status_code = 401
+
+
 class NotFoundError(CoreError):
     status_code = 404
 

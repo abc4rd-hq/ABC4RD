@@ -15,7 +15,7 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import urljoin, urlparse
 from urllib.request import Request, urlopen
 
-from ..errors import ValidationError
+from ..errors import AuthenticationError, ValidationError
 from ..service import AcademyCore, PILOT_PRICE_CURRENCY, PILOT_PRICE_MINOR
 
 
@@ -77,7 +77,9 @@ def verify_ipn_signature(
     """Verify NOWPayments' HMAC-SHA512 signature over canonical JSON."""
 
     secret = _required_text(ipn_secret, "ipn_secret")
-    supplied = _required_text(signature, "x-nowpayments-sig").lower()
+    if not isinstance(signature, str):
+        return False
+    supplied = signature.strip().lower()
     if not re.fullmatch(r"[0-9a-f]{128}", supplied):
         return False
     expected = hmac.new(
@@ -240,7 +242,7 @@ def process_ipn(
     if not isinstance(payload, Mapping):
         raise ValidationError("NOWPayments IPN body must be a JSON object")
     if not verify_ipn_signature(payload, signature, ipn_secret):
-        raise ValidationError("NOWPayments IPN signature is invalid")
+        raise AuthenticationError("NOWPayments IPN signature is invalid")
 
     payment_id = payload.get("payment_id")
     if isinstance(payment_id, bool) or not isinstance(payment_id, (str, int)):

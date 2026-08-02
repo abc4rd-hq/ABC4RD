@@ -3,6 +3,7 @@ from typing import Any, Callable, Dict, Iterable, Optional, Tuple
 from urllib.parse import parse_qs
 
 from .errors import CoreError, ValidationError
+from .payments.nowpayments import process_ipn
 from .service import AcademyCore
 
 
@@ -48,8 +49,18 @@ def create_app(
     database: str,
     live_payment_provider: Optional[str] = None,
     live_payment_gate_ref: Optional[str] = None,
+    nowpayments_ipn_secret: Optional[str] = None,
+    nowpayments_sandbox: bool = True,
 ) -> Callable:
     core = AcademyCore(database, live_payment_provider, live_payment_gate_ref)
+    if nowpayments_ipn_secret is not None:
+        if not isinstance(nowpayments_ipn_secret, str) or not nowpayments_ipn_secret.strip():
+            raise ValidationError("nowpayments_ipn_secret must be non-empty when configured")
+        nowpayments_ipn_secret = nowpayments_ipn_secret.strip()
+    if not nowpayments_sandbox and live_payment_provider != "nowpayments":
+        raise ValidationError(
+            "LIVE NOWPayments IPN requires live_payment_provider=nowpayments"
+        )
     writes: Dict[Tuple[str, str], Callable] = {
         ("POST", "/v1/identities"): core.create_identity,
         ("POST", "/v1/consents"): core.record_consent,
@@ -92,6 +103,21 @@ def create_app(
                 return _json_response(
                     start_response, "200 OK", core.list_oversight_outbox(limit)
                 )
+            if (
+                method == "POST"
+                and path == "/v1/payments/nowpayments/ipn"
+                and nowpayments_ipn_secret is not None
+            ):
+                body = _read_json(environ)
+                signature = environ.get("HTTP_X_NOWPAYMENTS_SIG", "")
+                result = process_ipn(
+                    core,
+                    body,
+                    signature,
+                    nowpayments_ipn_secret,
+                    sandbox=nowpayments_sandbox,
+                )
+                return _json_response(start_response, "200 OK", result)
 
             handler = writes.get((method, path))
             if handler is not None:
@@ -106,7 +132,13 @@ def create_app(
                 {"error": "not_found", "message": "route was not found"},
             )
         except CoreError as error:
-            labels = {400: "bad_request", 404: "not_found", 409: "conflict", 422: "validation_error"}
+            labels = {
+                400: "bad_request",
+                401: "unauthorized",
+                404: "not_found",
+                409: "conflict",
+                422: "validation_error",
+            }
             return _json_response(
                 start_response,
                 "%d %s" % (error.status_code, _reason(error.status_code)),
@@ -125,6 +157,7 @@ def create_app(
 def _reason(status_code: int) -> str:
     return {
         400: "Bad Request",
+        401: "Unauthorized",
         404: "Not Found",
         409: "Conflict",
         422: "Unprocessable Entity",
