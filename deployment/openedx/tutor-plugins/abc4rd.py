@@ -44,15 +44,17 @@ id.abc4rd.org{$default_site_port} {
 }
 
 payments.abc4rd.org{$default_site_port} {
-    @webhook path /v1/payments/nowpayments/ipn
-    handle @webhook {
-        import proxy "abc4rd-academy-core:8080"
+    route {
+        @webhook path /v1/payments/nowpayments/ipn
+        reverse_proxy @webhook "abc4rd-academy-core:8080" {
+            header_up X-Forwarded-Port 443
+        }
+
+        @checkout_result path /checkout/success /checkout/cancel
+        redir @checkout_result https://learn.abc4rd.org/dashboard 303
+
+        respond 404
     }
-
-    @checkout_result path /checkout/success /checkout/cancel
-    redir @checkout_result https://learn.abc4rd.org/dashboard 303
-
-    respond 404
 }
 """.strip(),
     )
