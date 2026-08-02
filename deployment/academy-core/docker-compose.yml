@@ -1,0 +1,33 @@
+services:
+  academy-core:
+    build:
+      context: ../..
+      dockerfile: academy-core/Containerfile
+    container_name: abc4rd-academy-core
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      NOWPAYMENTS_IPN_URL: https://payments.abc4rd.org/v1/payments/nowpayments/ipn
+      NOWPAYMENTS_SUCCESS_URL: https://payments.abc4rd.org/checkout/success
+      NOWPAYMENTS_CANCEL_URL: https://payments.abc4rd.org/checkout/cancel
+    networks:
+      - tutor
+    volumes:
+      - academy-core-data:/var/lib/abc4rd
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+networks:
+  tutor:
+    external: true
+    name: tutor_local_default
+
+volumes:
+  academy-core-data:
+    name: abc4rd-academy-core-data
