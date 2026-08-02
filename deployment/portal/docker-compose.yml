@@ -1,0 +1,73 @@
+name: abc4rd-portal
+
+services:
+  portal:
+    build:
+      context: .
+      dockerfile: Containerfile
+    image: abc4rd/portal:0.1.0
+    container_name: abc4rd-portal
+    restart: unless-stopped
+    environment:
+      ABC4RD_CERTIFICATE_SIGNING_KEY: ${ABC4RD_CERTIFICATE_SIGNING_KEY:?required}
+      ABC4RD_PORTAL_DATA: /app/data/state.json
+      ABC4RD_VERIFY_BASE_URL: https://verify.abc4rd.org
+    volumes:
+      - ./data:/app/data:ro
+    networks:
+      - academy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8080/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+  auth:
+    image: quay.io/oauth2-proxy/oauth2-proxy:v7.15.2
+    container_name: abc4rd-portal-auth
+    restart: unless-stopped
+    depends_on:
+      portal:
+        condition: service_healthy
+    command:
+      - --provider=oidc
+      - --oidc-issuer-url=https://id.abc4rd.org/realms/abc4rd
+      - --code-challenge-method=S256
+      - --client-id=abc4rd-portal
+      - --client-secret=${ABC4RD_PORTAL_OIDC_CLIENT_SECRET:?required}
+      - --cookie-secret=${ABC4RD_PORTAL_COOKIE_SECRET:?required}
+      - --cookie-name=_abc4rd_portal
+      - --cookie-secure=true
+      - --cookie-samesite=lax
+      - --email-domain=*
+      - --http-address=0.0.0.0:4180
+      - --redirect-url=https://app.abc4rd.org/oauth2/callback
+      - --reverse-proxy=true
+      - --trusted-proxy-ip=172.16.0.0/12
+      - --set-xauthrequest=true
+      - --pass-access-token=true
+      - --pass-user-headers=true
+      - --skip-provider-button=true
+      - --upstream=http://abc4rd-portal:8080
+      - --whitelist-domain=.abc4rd.org
+    networks:
+      - academy
+    healthcheck:
+      test: ["CMD", "/bin/oauth2-proxy", "--version"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+networks:
+  academy:
+    external: true
+    name: tutor_local_default

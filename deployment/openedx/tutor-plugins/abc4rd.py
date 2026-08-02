@@ -65,6 +65,40 @@ payments.abc4rd.org{$default_site_port} {
 crm.abc4rd.org{$default_site_port} {
     import proxy "abc4rd-erpnext-frontend:8080"
 }
+
+app.abc4rd.org{$default_site_port} {
+    import proxy "abc4rd-portal-auth:4180"
+}
+
+verify.abc4rd.org{$default_site_port} {
+    route {
+        @public_verification path /health /c/*
+        reverse_proxy @public_verification "abc4rd-portal:8080" {
+            header_up -X-Forwarded-Access-Token
+            header_up -X-Forwarded-User
+            header_up -X-Forwarded-Email
+            header_up -X-Auth-Request-User
+            header_up -X-Auth-Request-Email
+        }
+        respond 404
+    }
+}
+
+library.abc4rd.org{$default_site_port} {
+    redir https://app.abc4rd.org/library 302
+}
+
+chat.abc4rd.org{$default_site_port} {
+    import proxy "abc4rd-element:80"
+}
+
+matrix.abc4rd.org{$default_site_port} {
+    header {
+        X-Content-Type-Options nosniff
+        Referrer-Policy no-referrer
+    }
+    import proxy "abc4rd-synapse:8008"
+}
 """.strip(),
     )
 )
