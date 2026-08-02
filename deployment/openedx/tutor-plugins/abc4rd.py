@@ -26,6 +26,7 @@ SOCIAL_AUTH_OAUTH_SECRETS = {
     **SOCIAL_AUTH_OAUTH_SECRETS,
     "identityServer3": {{ ABC4RD_OIDC_CLIENT_SECRET | tojson }},
 }
+SOCIAL_AUTH_IDENTITYSERVER3_SCOPE = ["openid", "profile", "email"]
 """.strip(),
     )
 )
