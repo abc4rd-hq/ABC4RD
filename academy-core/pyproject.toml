@@ -12,8 +12,9 @@ dependencies = []
 [project.scripts]
 academy-core = "academy_core.__main__:main"
 
-[tool.setuptools]
-packages = ["academy_core"]
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["academy_core*"]
 
 [tool.setuptools.package-data]
 academy_core = ["schema/*.sql"]
