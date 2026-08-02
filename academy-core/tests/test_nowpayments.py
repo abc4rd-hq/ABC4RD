@@ -1,12 +1,15 @@
 import hashlib
 import hmac
+import io
 import json
 import tempfile
 import unittest
 from pathlib import Path
+from wsgiref.util import setup_testing_defaults
 
+from academy_core.app import create_app
 from academy_core.db import connect
-from academy_core.errors import ValidationError
+from academy_core.errors import AuthenticationError, ValidationError
 from academy_core.payments.nowpayments import (
     NOWPAYMENTS_LIVE_BASE_URL,
     NOWPAYMENTS_SANDBOX_BASE_URL,
@@ -137,7 +140,7 @@ class NowPaymentsIpnTest(unittest.TestCase):
 
     def test_invalid_signature_is_rejected_before_write(self):
         payload = finished_payload()
-        with self.assertRaises(ValidationError):
+        with self.assertRaises(AuthenticationError):
             process_ipn(self.core, payload, "0" * 128, IPN_SECRET)
 
         connection = connect(self.database)
@@ -169,6 +172,62 @@ class NowPaymentsIpnTest(unittest.TestCase):
             result["ledger"]["fact_type"], "PROVIDER_CONFIRMED_REFUND"
         )
         self.assertFalse(result["ledger"]["recognized_charge"])
+
+
+class NowPaymentsIpnApiTest(unittest.TestCase):
+    def setUp(self):
+        self.temporary = tempfile.TemporaryDirectory()
+        self.database = str(Path(self.temporary.name) / "core.db")
+
+    def tearDown(self):
+        self.temporary.cleanup()
+
+    def call(self, app, payload, supplied_signature):
+        raw = json.dumps(payload).encode("utf-8")
+        environ = {}
+        setup_testing_defaults(environ)
+        environ.update(
+            REQUEST_METHOD="POST",
+            PATH_INFO="/v1/payments/nowpayments/ipn",
+            CONTENT_TYPE="application/json",
+            CONTENT_LENGTH=str(len(raw)),
+            HTTP_X_NOWPAYMENTS_SIG=supplied_signature,
+            **{"wsgi.input": io.BytesIO(raw)},
+        )
+        captured = {}
+
+        def start_response(status, headers):
+            captured["status"] = status
+            captured["headers"] = headers
+
+        response = b"".join(app(environ, start_response))
+        return captured["status"], json.loads(response.decode("utf-8"))
+
+    def test_configured_webhook_accepts_valid_ipn_and_replay(self):
+        app = create_app(self.database, nowpayments_ipn_secret=IPN_SECRET)
+        payload = finished_payload()
+        signed = signature(payload)
+
+        first_status, first = self.call(app, payload, signed)
+        replay_status, replay = self.call(app, payload, signed)
+
+        self.assertEqual(first_status, "200 OK")
+        self.assertEqual(replay_status, "200 OK")
+        self.assertEqual(first, replay)
+        self.assertTrue(first["recorded"])
+
+    def test_invalid_signature_returns_401(self):
+        app = create_app(self.database, nowpayments_ipn_secret=IPN_SECRET)
+        status, body = self.call(app, finished_payload(), "0" * 128)
+        self.assertEqual(status, "401 Unauthorized")
+        self.assertEqual(body["error"], "unauthorized")
+
+    def test_webhook_route_is_absent_without_secret(self):
+        app = create_app(self.database)
+        payload = finished_payload()
+        status, body = self.call(app, payload, signature(payload))
+        self.assertEqual(status, "404 Not Found")
+        self.assertEqual(body["error"], "not_found")
 
 
 if __name__ == "__main__":

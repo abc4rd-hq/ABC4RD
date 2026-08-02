@@ -103,10 +103,11 @@ invoice = client.create_pilot_invoice(
 )
 ```
 
-Публичный webhook endpoint намеренно пока не включён: до него нужны DNS/TLS,
-service authentication для Core и sandbox credentials. Функция `process_ipn`
-уже проверяет `x-nowpayments-sig`, цену и валюту до любой записи, а повтор
-одинакового callback не создаёт второй финансовый факт.
+Webhook route `/v1/payments/nowpayments/ipn` по умолчанию отсутствует и
+появляется только при наличии `NOWPAYMENTS_IPN_SECRET` в среде процесса. Route
+проверяет `x-nowpayments-sig`, цену и валюту до любой записи, а повтор одинакового
+callback не создаёт второй финансовый факт. До его публикации всё равно нужны
+DNS/TLS и sandbox credentials; API key этому входящему endpoint не передаётся.
 
 ## AI-first review и oversight outbox
 
