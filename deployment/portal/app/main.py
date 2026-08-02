@@ -250,6 +250,17 @@ def api_me() -> Response:
     return jsonify(participant)
 
 
+@app.get("/mobile")
+def mobile_setup() -> str:
+    return render_template(
+        "mobile.html",
+        participant=_current_participant(),
+        messenger_url="https://chat.abc4rd.org",
+        homeserver_url="https://matrix.abc4rd.org",
+        identity_security_url="https://id.abc4rd.org/realms/abc4rd/account/#/security/signingin",
+    )
+
+
 @app.get("/library/pilot-0001")
 def library_reader() -> Response:
     participant = _current_participant()

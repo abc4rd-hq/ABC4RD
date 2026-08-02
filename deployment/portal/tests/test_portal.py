@@ -50,6 +50,13 @@ class PortalReaderTests(unittest.TestCase):
         response = self.client.get("/library/pilot-0001")
         self.assertEqual(response.status_code, 403)
 
+    def test_mobile_setup_has_no_separate_registration(self) -> None:
+        response = self.client.get("/mobile")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"https://matrix.abc4rd.org", response.data)
+        self.assertIn("Отдельно регистрироваться".encode("utf-8"), response.data)
+        self.assertIn("25 МБ".encode("utf-8"), response.data)
+
     def test_reader_is_private_watermarked_and_audited_idempotently(self) -> None:
         core_response = mock.MagicMock()
         core_response.__enter__.return_value = core_response

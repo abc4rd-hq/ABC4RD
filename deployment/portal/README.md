@@ -17,5 +17,9 @@ no-index headers. This is accountable delivery, not DRM: screenshots or manual
 copying cannot be made impossible in a browser. The material's final license is
 intentionally shown as pending instead of being invented by the platform.
 
+`/mobile` is the learner-facing morning checklist for Element X, the custom
+homeserver, mobile permissions, passkey enrollment and the web fallback. It does
+not create accounts or bypass Keycloak; public access remains behind oauth2-proxy.
+
 Production secrets belong in `.env` with mode `600` and in 1Password. The
 public verification endpoint is served separately on `verify.abc4rd.org`.
