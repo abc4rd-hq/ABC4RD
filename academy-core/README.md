@@ -32,6 +32,9 @@ S3 или платёжного провайдера.
 - Утверждённая целевая цена пилота: `USD 1.00`, то есть `amount_minor=100`.
 - Payment shadow ledger различает `ATTEMPT`, подтверждённый charge и refund;
   попытка всегда имеет `recognized_charge=false`.
+- Добавлен sandbox-first адаптер NOWPayments: фиксированный invoice на `USD 1.00`,
+  HMAC-SHA512-проверка IPN, отбрасывание промежуточных статусов и идемпотентная
+  запись только `finished`/`refunded` в shadow ledger.
 - Будущий режим `LIVE` моделируется схемой, но по умолчанию заблокирован. Для
   записи live-наблюдений одновременно нужны явные provider и gate reference.
 - AI-first review: решение содержит `reviewer_agent_id`, модель и версию.
@@ -80,6 +83,30 @@ Core нет операции создания, подтверждения или
 провайдера; `settlement_capability` всегда остаётся `false`.
 Старые V1-записи при миграции консервативно получают `fact_type=ATTEMPT`, поэтому
 не превращаются задним числом в подтверждённые списания.
+
+### Криптоплатёжный адаптер
+
+`academy_core.payments.nowpayments` по умолчанию использует sandbox API. Переход
+на LIVE требует одновременных `sandbox=False` и `allow_live=True`; это защищает
+от случайной отправки запроса в боевой API. API key и IPN secret передаются
+только средой исполнения или secret manager и не записываются в Core.
+
+```python
+from academy_core.payments import NowPaymentsClient
+
+client = NowPaymentsClient(api_key="read-from-secret-manager")
+invoice = client.create_pilot_invoice(
+    order_id="opaque-order-uuid",
+    ipn_callback_url="https://payments.abc4rd.org/v1/nowpayments/ipn",
+    success_url="https://learn.abc4rd.org/payment/success",
+    cancel_url="https://learn.abc4rd.org/payment/cancel",
+)
+```
+
+Публичный webhook endpoint намеренно пока не включён: до него нужны DNS/TLS,
+service authentication для Core и sandbox credentials. Функция `process_ipn`
+уже проверяет `x-nowpayments-sig`, цену и валюту до любой записи, а повтор
+одинакового callback не создаёт второй финансовый факт.
 
 ## AI-first review и oversight outbox
 
@@ -183,7 +210,8 @@ python3 -m academy_core verify-audit --db var/academy-core.db
 Тесты проверяют цену `USD 1.00`, различие attempt/charge, default-deny для LIVE,
 явную будущую LIVE-конфигурацию без settlement, AI identity/model/version,
 независимость appeal agent, oversight outbox, credential approval,
-идемпотентность, append-only audit chain и строгий HTTP payload.
+идемпотентность, append-only audit chain, строгий HTTP payload, sandbox invoice,
+IPN signature, duplicate webhook и refund.
 
 ## Что нужно до интеграции или production
 
