@@ -23,7 +23,9 @@ Uploads are capped at 25 MB per file. URL previews are enabled with private,
 loopback, documentation and multicast networks blocked from the preview fetcher.
 
 The deployment is deliberately single-node for the three-person pilot. Its
-PostgreSQL database and media directory must be covered by the server backup.
+PostgreSQL, media and the homeserver signing key are included in the encrypted
+runtime bundle created by `deployment/backup/create-runtime-backup.sh`. The
+copy is not complete until it is moved off-host and its SHA-256 is verified.
 Federation is disabled for the pilot and can be reviewed separately later.
 
 The pilot room intentionally remains invite-only and unencrypted so future

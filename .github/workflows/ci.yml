@@ -28,6 +28,8 @@ jobs:
           PYTHONPATH=deployment/portal python -m unittest discover -s deployment/portal/tests -v
       - name: Check Keycloak automation
         run: bash -n deployment/keycloak/configure-passkeys.sh deployment/keycloak/configure-portal-clients.sh
+      - name: Check backup automation
+        run: bash -n deployment/backup/create-runtime-backup.sh
       - name: Compile Tutor plugin
         run: python -m py_compile deployment/openedx/tutor-plugins/abc4rd.py
       - name: Check ERPNext deployment
