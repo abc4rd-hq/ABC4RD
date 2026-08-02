@@ -22,6 +22,8 @@ jobs:
         run: python -m unittest discover -s tests -v
       - name: Test Digital Twin
         run: python -m unittest discover -s digital-twin/tests -v
+      - name: Compile Tutor plugin
+        run: python -m py_compile deployment/openedx/tutor-plugins/abc4rd.py
       - name: Check ERPNext deployment
         working-directory: deployment/erpnext
         run: ./scripts/check-static.sh

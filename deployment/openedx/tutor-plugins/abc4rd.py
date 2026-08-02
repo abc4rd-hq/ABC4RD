@@ -3,10 +3,30 @@
 from tutor import hooks
 
 
+hooks.Filters.CONFIG_DEFAULTS.add_items(
+    [
+        ("ABC4RD_OIDC_CLIENT_SECRET", ""),
+    ]
+)
+
+
 hooks.Filters.ENV_PATCHES.add_item(
     (
         "openedx-lms-common-settings",
         "FEATURES['ALLOW_PUBLIC_ACCOUNT_CREATION'] = False",
+    )
+)
+
+
+hooks.Filters.ENV_PATCHES.add_item(
+    (
+        "openedx-lms-common-settings",
+        """
+SOCIAL_AUTH_OAUTH_SECRETS = {
+    **SOCIAL_AUTH_OAUTH_SECRETS,
+    "identityServer3": {{ ABC4RD_OIDC_CLIENT_SECRET | tojson }},
+}
+""".strip(),
     )
 )
 
