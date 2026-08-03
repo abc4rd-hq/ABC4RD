@@ -68,8 +68,8 @@ def _decode_access_token() -> dict[str, Any]:
     return payload if isinstance(payload, dict) else {}
 
 
-def _current_participant() -> dict[str, Any] | None:
-    claims = _decode_access_token()
+def _current_participant(claims: dict[str, Any] | None = None) -> dict[str, Any] | None:
+    claims = claims if claims is not None else _decode_access_token()
     subject = claims.get("sub")
     username = claims.get("preferred_username")
     state = _load_state()
@@ -79,6 +79,14 @@ def _current_participant() -> dict[str, Any] | None:
         if username and participant.get("username") == username:
             return participant
     return None
+
+
+def _is_portal_admin(claims: dict[str, Any]) -> bool:
+    realm_access = claims.get("realm_access")
+    if not isinstance(realm_access, dict):
+        return False
+    roles = realm_access.get("roles")
+    return isinstance(roles, list) and "abc4rd-admin" in roles
 
 
 def _certificate_signature(certificate_id: str) -> str:
@@ -228,7 +236,19 @@ def health() -> Response:
 
 @app.get("/")
 def dashboard() -> str:
-    participant = _current_participant()
+    claims = _decode_access_token()
+    if _is_portal_admin(claims):
+        return render_template(
+            "admin.html",
+            admin_name=claims.get("name") or claims.get("preferred_username") or "администратор",
+            academy_url="https://learn.abc4rd.org",
+            studio_url="https://studio.abc4rd.org",
+            crm_url="https://crm.abc4rd.org",
+            messenger_url="https://chat.abc4rd.org",
+            identity_url="https://id.abc4rd.org/realms/abc4rd/account/",
+            mail_admin_url="https://www.m43.online/admin/",
+        )
+    participant = _current_participant(claims)
     return render_template(
         "dashboard.html",
         participant=participant,

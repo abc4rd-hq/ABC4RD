@@ -59,6 +59,42 @@ class PortalReaderTests(unittest.TestCase):
         ).decode("ascii").rstrip("=")
         return f"header.{payload}.signature"
 
+    def admin_token(self) -> str:
+        payload = base64.urlsafe_b64encode(
+            json.dumps(
+                {
+                    "sub": "admin-subject-test",
+                    "preferred_username": "rem.ginzburg",
+                    "name": "Rem Ginzburg",
+                    "realm_access": {"roles": ["abc4rd-admin"]},
+                }
+            ).encode("utf-8")
+        ).decode("ascii").rstrip("=")
+        return f"header.{payload}.signature"
+
+    def test_realm_admin_gets_the_administration_dashboard(self) -> None:
+        response = self.client.get(
+            "/", headers={"X-Forwarded-Access-Token": self.admin_token()}
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Rem Ginzburg", response.data)
+        self.assertIn(b"https://studio.abc4rd.org", response.data)
+        self.assertIn(b"https://crm.abc4rd.org", response.data)
+        self.assertIn(b"https://chat.abc4rd.org", response.data)
+        self.assertIn(b"https://www.m43.online/admin/", response.data)
+
+    def test_non_participant_without_admin_role_stays_in_sync_state(self) -> None:
+        payload = base64.urlsafe_b64encode(
+            json.dumps({"sub": "unknown-subject"}).encode("utf-8")
+        ).decode("ascii").rstrip("=")
+        response = self.client.get(
+            "/", headers={"X-Forwarded-Access-Token": f"header.{payload}.signature"}
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Профиль создаётся".encode("utf-8"), response.data)
+
     def test_reader_requires_a_synchronized_entitlement(self) -> None:
         response = self.client.get("/library/pilot-0001")
         self.assertEqual(response.status_code, 403)
