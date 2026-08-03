@@ -18,6 +18,45 @@ hooks.Filters.ENV_PATCHES.add_item(
 )
 
 
+# Keep Open edX micro-frontends visually consistent with the dark ABC4RD portal.
+# This is the compiled Indigo theme for the exact Open edX Ulmo release, pinned
+# to an immutable upstream commit. Both preference variants deliberately use the
+# dark bundle until ABC4RD ships its own light palette and theme switcher.
+hooks.Filters.ENV_PATCHES.add_item(
+    (
+        "mfe-lms-common-settings",
+        """
+MFE_CONFIG["PARAGON_THEME_URLS"] = {
+    "core": {
+        "urls": {
+            "default": "https://cdn.jsdelivr.net/npm/@openedx/paragon@$paragonVersion/dist/core.min.css",
+            "brandOverride": "https://verify.abc4rd.org/static/openedx-theme.css",
+        },
+    },
+    "defaults": {
+        "light": "light",
+        "dark": "dark",
+    },
+    "variants": {
+        "light": {
+            "urls": {
+                "default": "https://verify.abc4rd.org/static/openedx-theme.css",
+                "brandOverride": "https://verify.abc4rd.org/static/openedx-theme.css",
+            },
+        },
+        "dark": {
+            "urls": {
+                "default": "https://verify.abc4rd.org/static/openedx-theme.css",
+                "brandOverride": "https://verify.abc4rd.org/static/openedx-theme.css",
+            },
+        },
+    },
+}
+""".strip(),
+    )
+)
+
+
 hooks.Filters.ENV_PATCHES.add_item(
     (
         "openedx-lms-common-settings",
@@ -80,7 +119,7 @@ app.abc4rd.org{$default_site_port} {
 
 verify.abc4rd.org{$default_site_port} {
     route {
-        @public_verification path /health /c/*
+        @public_verification path /health /c/* /static/openedx-theme.css
         reverse_proxy @public_verification "abc4rd-portal:8080" {
             header_up -X-Forwarded-Access-Token
             header_up -X-Forwarded-User

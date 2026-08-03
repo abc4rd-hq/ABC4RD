@@ -87,6 +87,15 @@ class PortalReaderTests(unittest.TestCase):
         self.assertEqual(messages.status_code, 302)
         self.assertEqual(messages.headers["Location"], "https://chat.abc4rd.org")
 
+    def test_openedx_theme_is_served_as_css(self) -> None:
+        response = self.client.get("/static/openedx-theme.css")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.mimetype, "text/css")
+        self.assertIn(b"--abc4rd-canvas", response.data)
+        self.assertIn(b".pgn__card", response.data)
+        response.close()
+
     def test_reader_is_private_watermarked_and_audited_idempotently(self) -> None:
         core_response = mock.MagicMock()
         core_response.__enter__.return_value = core_response
