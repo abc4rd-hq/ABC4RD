@@ -7,6 +7,11 @@ checked_http=0
 checked_tls=0
 tls_min_days=99999
 backup_age_hours=unknown
+disk_used_percent=unknown
+inode_used_percent=unknown
+memory_available_percent=unknown
+failed_units=unknown
+reboot_required=no
 
 check_container() {
   local name="$1"
@@ -119,6 +124,44 @@ if ! ss -lnu | grep -q ':7882 '; then
   failures+=("port:livekit-udp:closed")
 fi
 
+disk_used_percent="$(df -P / 2>/dev/null | awk 'NR==2 {gsub(/%/, "", $5); print $5}')"
+if [[ ! "$disk_used_percent" =~ ^[0-9]+$ ]]; then
+  failures+=("host:disk-unreadable")
+elif (( disk_used_percent >= 85 )); then
+  failures+=("host:disk-${disk_used_percent}pct")
+fi
+
+inode_used_percent="$(df -Pi / 2>/dev/null | awk 'NR==2 {gsub(/%/, "", $5); print $5}')"
+if [[ ! "$inode_used_percent" =~ ^[0-9]+$ ]]; then
+  failures+=("host:inodes-unreadable")
+elif (( inode_used_percent >= 85 )); then
+  failures+=("host:inodes-${inode_used_percent}pct")
+fi
+
+memory_available_percent="$(awk '
+  /^MemTotal:/ { total=$2 }
+  /^MemAvailable:/ { available=$2 }
+  END { if (total > 0) printf "%d", (available * 100) / total; else print "0" }
+' /proc/meminfo 2>/dev/null)"
+if [[ ! "$memory_available_percent" =~ ^[0-9]+$ ]]; then
+  failures+=("host:memory-unreadable")
+elif (( memory_available_percent < 15 )); then
+  failures+=("host:memory-available-${memory_available_percent}pct")
+fi
+
+failed_units="$(systemctl list-units --failed --no-legend --plain --no-pager 2>/dev/null \
+  | awk 'NF { count++ } END { print count + 0 }')"
+if [[ ! "$failed_units" =~ ^[0-9]+$ ]]; then
+  failures+=("host:failed-units-unreadable")
+elif (( failed_units > 0 )); then
+  failures+=("host:failed-units-${failed_units}")
+fi
+
+if [[ -e /run/reboot-required ]]; then
+  reboot_required=yes
+  failures+=("host:reboot-required")
+fi
+
 state_file=/opt/abc4rd/portal/data/state.json
 participant_count=0
 certificate_count=0
@@ -164,6 +207,8 @@ if (( ${#failures[@]} > 0 )); then
   exit 1
 fi
 
-printf 'ABC4RD_HEALTH OK at=%s containers=%d http=%d tls=%d tls_min=%sd participants=%s certificates=%s backup_age=%sh\n' \
+printf 'ABC4RD_HEALTH OK at=%s containers=%d http=%d tls=%d tls_min=%sd participants=%s certificates=%s backup_age=%sh disk=%s%% inodes=%s%% mem_available=%s%% failed_units=%s reboot=%s\n' \
   "$timestamp" "$checked_containers" "$checked_http" "$checked_tls" \
-  "$tls_min_days" "$participant_count" "$certificate_count" "$backup_age_hours"
+  "$tls_min_days" "$participant_count" "$certificate_count" "$backup_age_hours" \
+  "$disk_used_percent" "$inode_used_percent" "$memory_available_percent" \
+  "$failed_units" "$reboot_required"
