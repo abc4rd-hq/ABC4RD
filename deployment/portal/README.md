@@ -23,3 +23,26 @@ not create accounts or bypass Keycloak; public access remains behind oauth2-prox
 
 Production secrets belong in `.env` with mode `600` and in 1Password. The
 public verification endpoint is served separately on `verify.abc4rd.org`.
+
+## Morning acceptance gate
+
+The server-side checks do not replace the following one-time checks that must be
+performed by the participant on their own devices:
+
+1. Open `https://app.abc4rd.org`, sign in through Keycloak and confirm that the
+   course, library, certificate and messenger cards are visible.
+2. Download the certificate PDF, scan its QR code in a private browser window and
+   confirm that `https://verify.abc4rd.org` reports the same certificate ID,
+   participant label, course and grade.
+3. Install Element X, choose `https://matrix.abc4rd.org` as the homeserver and use
+   the same Keycloak account. Do not create a second Matrix account.
+4. Confirm room messages and a small file transfer, then make one voice and one
+   video call between two real devices. The automated checks prove service health,
+   but cannot prove device microphone, camera or notification permissions.
+5. Enrol a passkey personally in Keycloak account security, sign out and verify a
+   new passkey login. Confirm that password fallback still works before ending the
+   session.
+
+Record each result as `PASS`, `FAIL` or `BLOCKED` with the device/browser name and
+time. Never place passwords, passkeys, recovery material or screenshots containing
+personal data in GitHub issues or repository files.
