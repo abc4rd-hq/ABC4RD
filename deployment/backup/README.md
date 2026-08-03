@@ -29,3 +29,21 @@ printf '%s\n' "$ABC4RD_BACKUP_PASSWORD" | sudo ./create-runtime-backup.sh
 The master password is stored in 1Password vault `ABC4RD`, item
 `ABC4RD BACKUP ENCRYPTION`. A backup is not off-host until the `.gpg` file and
 its `.sha256` file are copied elsewhere and the checksum matches.
+
+## Isolated restore drill
+
+`check-runtime-restore.sh` decrypts the latest runtime bundle into a root-owned
+temporary directory, verifies every manifest checksum, and restores both
+PostgreSQL dumps into throwaway PostgreSQL containers. The containers use no
+network, no production volume, no published port and tmpfs-only database storage.
+It also opens the Academy Core database read-only, validates the portal projection
+and checks that the Matrix signing key is present. Temporary plaintext and restored
+databases are removed on exit.
+
+```bash
+printf '%s\n' "$ABC4RD_BACKUP_PASSWORD" | sudo ./check-runtime-restore.sh
+```
+
+The drill proves that the current artifacts can be parsed and restored in isolation.
+It does not replace a controlled full disaster-recovery exercise with DNS cutover
+and application-level sign-in tests.
