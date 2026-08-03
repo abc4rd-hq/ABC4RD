@@ -70,6 +70,23 @@ class PortalReaderTests(unittest.TestCase):
         self.assertIn("Отдельно регистрироваться".encode("utf-8"), response.data)
         self.assertIn("25 МБ".encode("utf-8"), response.data)
 
+    def test_navigation_opens_real_library_certificate_and_messenger_destinations(self) -> None:
+        headers = {"X-Forwarded-Access-Token": self.token()}
+
+        library = self.client.get("/library", headers=headers)
+        certificates = self.client.get("/certificates", headers=headers)
+        messages = self.client.get("/messages", headers=headers)
+
+        self.assertEqual(library.status_code, 302)
+        self.assertEqual(library.headers["Location"], "/library/pilot-0001")
+        self.assertEqual(certificates.status_code, 302)
+        self.assertEqual(
+            certificates.headers["Location"],
+            f"/certificate/{self.certificate_id}.pdf",
+        )
+        self.assertEqual(messages.status_code, 302)
+        self.assertEqual(messages.headers["Location"], "https://chat.abc4rd.org")
+
     def test_reader_is_private_watermarked_and_audited_idempotently(self) -> None:
         core_response = mock.MagicMock()
         core_response.__enter__.return_value = core_response

@@ -13,7 +13,7 @@ from urllib import error as urlerror
 from urllib import request as urlrequest
 
 import qrcode
-from flask import Flask, Response, abort, jsonify, make_response, render_template, request, send_file
+from flask import Flask, Response, abort, jsonify, make_response, redirect, render_template, request, send_file, url_for
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4, landscape
 from reportlab.pdfbase import pdfmetrics
@@ -227,9 +227,6 @@ def health() -> Response:
 
 
 @app.get("/")
-@app.get("/library")
-@app.get("/messages")
-@app.get("/certificates")
 def dashboard() -> str:
     participant = _current_participant()
     return render_template(
@@ -240,6 +237,31 @@ def dashboard() -> str:
         messenger_url="https://chat.abc4rd.org",
         identity_security_url="https://id.abc4rd.org/realms/abc4rd/account/#/security/signingin",
     )
+
+
+@app.get("/library")
+def library_home() -> Response:
+    participant = _current_participant()
+    if participant is None or not _has_library_access(participant):
+        abort(403)
+    return redirect(url_for("library_reader"))
+
+
+@app.get("/messages")
+def messages_home() -> Response:
+    return redirect("https://chat.abc4rd.org")
+
+
+@app.get("/certificates")
+def certificates_home() -> Response:
+    participant = _current_participant()
+    if participant is None:
+        abort(404)
+    for course in participant.get("courses", []):
+        certificate = course.get("certificate")
+        if isinstance(certificate, dict) and certificate.get("id") and course.get("passed"):
+            return redirect(url_for("certificate_pdf", certificate_id=certificate["id"]))
+    abort(404)
 
 
 @app.get("/api/me")
