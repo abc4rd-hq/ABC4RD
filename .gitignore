@@ -10,6 +10,8 @@ deployment/keycloak/.env
 course-factory/
 docs/
 backups/
+output/
+tmp/
 
 # Python
 __pycache__/

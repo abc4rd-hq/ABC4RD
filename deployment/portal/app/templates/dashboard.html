@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#070b14">
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  <title>ABC4RD - Личный кабинет</title>
+  <link rel="stylesheet" href="/static/portal.css?v=6ac2aa3">
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <a class="brand" href="/"><span class="brand-mark">◇</span><span>ABC4RD</span></a>
+      <nav>
+        <a class="{{ 'active' if active == 'home' else '' }}" href="/"><span>⌂</span>Главная</a>
+        <a href="{{ academy_url }}"><span>▣</span>Мои курсы</a>
+        <a class="{{ 'active' if active == 'library' else '' }}" href="/library"><span>▤</span>Библиотека</a>
+        <a class="{{ 'active' if active == 'messages' else '' }}" href="/messages"><span>◌</span>Сообщения</a>
+        <a class="{{ 'active' if active == 'certificates' else '' }}" href="/certificates"><span>◇</span>Сертификаты</a>
+      </nav>
+      <div class="sidebar-note">Технический пилот<br><strong>ABC4RD Academy</strong></div>
+    </aside>
+
+    <main>
+      <header>
+        <div>
+          <p class="eyebrow">ЛИЧНЫЙ КАБИНЕТ</p>
+          <h1>Добро пожаловать, {{ participant.display_label if participant else 'участник' }}</h1>
+        </div>
+        <div class="identity"><span class="status-dot"></span>{{ participant.lifecycle_state if participant else 'синхронизация' }}</div>
+      </header>
+
+      {% if not participant %}
+      <section class="notice">
+        <h2>Профиль создаётся</h2>
+        <p>Вход уже работает. Academy Core завершает синхронизацию профиля и курса.</p>
+      </section>
+      {% else %}
+      <section class="hero">
+        <div>
+          <p class="eyebrow">ABC4RD ID</p>
+          <h2>{{ participant.abc4rd_id }}</h2>
+          <p>Единый проверяемый идентификатор для Академии, CRM, библиотеки и документов.</p>
+        </div>
+        <div class="score">{{ participant.courses[0].grade_percent|int if participant.courses else 0 }}<small>%</small><span>результат</span></div>
+      </section>
+
+      <section class="grid">
+        <article class="card course-card">
+          <div class="card-top"><span class="pill green">АКТИВНЫЙ КУРС</span><span>0001</span></div>
+          {% if participant.courses %}
+          <h3>{{ participant.courses[0].title }}</h3>
+          <div class="progress"><i style="width: {{ participant.courses[0].grade_percent }}%"></i></div>
+          <div class="card-meta"><span>{{ participant.courses[0].grade_percent|int }}% пройдено</span><a href="{{ academy_url }}">Продолжить →</a></div>
+          {% else %}<h3>Курс пока не назначен</h3>{% endif %}
+        </article>
+
+        <article class="card">
+          <div class="icon violet">▤</div>
+          <p class="eyebrow">БИБЛИОТЕКА</p>
+          <h3>Материалы курса 0001</h3>
+          <p>Первый учебный путеводитель уже доступен в защищённом читателе.</p>
+          <a class="button secondary" href="/library/pilot-0001">Открыть читатель</a>
+        </article>
+
+        <article class="card">
+          <div class="icon cyan">◌</div>
+          <p class="eyebrow">МЕССЕНДЖЕР</p>
+          <h3>Учебное пространство</h3>
+          <p>Сообщения, группа пилота и поддержка с тем же ABC4RD ID.</p>
+          <a class="button secondary" href="{{ messenger_url }}">Открыть сообщения</a>
+          <p><a class="button secondary" href="/mobile">Настроить телефон</a></p>
+        </article>
+
+        <article class="card certificate-card">
+          <div class="icon amber">◇</div>
+          <p class="eyebrow">СЕРТИФИКАТ</p>
+          {% set course = participant.courses[0] if participant.courses else none %}
+          {% if course and course.certificate %}
+          <h3>Маршрут подтверждён</h3>
+          <p>PDF с QR-проверкой сформирован по подтверждённому результату курса.</p>
+          <a class="button" href="/certificate/{{ course.certificate.id }}.pdf">Скачать PDF</a>
+          {% else %}
+          <h3>Ещё не выпущен</h3><p>Сертификат появится после подтверждённого прохождения курса.</p>
+          {% endif %}
+        </article>
+
+        <article class="card">
+          <div class="icon violet">⌁</div>
+          <p class="eyebrow">БЕЗОПАСНОСТЬ</p>
+          <h3>Вход без пароля</h3>
+          <p>Создайте passkey для быстрого входа по Face ID, Touch ID или защите устройства. Пароль останется резервным.</p>
+          <a class="button secondary" href="{{ identity_security_url }}">Настроить passkey</a>
+        </article>
+      </section>
+      {% endif %}
+    </main>
+  </div>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#070b14">
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  <title>ABC4RD — настройка телефона</title>
+  <link rel="stylesheet" href="/static/portal.css?v=6ac2aa3">
+  <link rel="stylesheet" href="/static/mobile.css?v=6ac2aa3">
+</head>
+<body>
+  <main class="mobile-guide">
+    <header>
+      <div>
+        <p class="eyebrow">ABC4RD НА ТЕЛЕФОНЕ</p>
+        <h1>Мессенджер и вход без пароля</h1>
+      </div>
+      <a class="button secondary" href="/">Вернуться в кабинет</a>
+    </header>
+
+    <section class="mobile-hero">
+      <div>
+        <span class="pill green">ГОТОВО К ПОДКЛЮЧЕНИЮ</span>
+        <h2>{{ participant.display_label if participant else 'Ваш ABC4RD ID' }}</h2>
+        <p>Один аккаунт открывает Академию, кабинет и Element X. Отдельно регистрироваться в мессенджере не нужно.</p>
+      </div>
+      <div class="server-address"><small>ДОМАШНИЙ СЕРВЕР</small><code>{{ homeserver_url }}</code></div>
+    </section>
+
+    <section class="setup-steps">
+      <article><strong>1</strong><div><h3>Установите Element X</h3><p>В App Store или Google Play найдите официальное приложение «Element X» от Element.</p></div></article>
+      <article><strong>2</strong><div><h3>Укажите свой сервер</h3><p>Выберите другой домашний сервер и введите <code>{{ homeserver_url }}</code>.</p></div></article>
+      <article><strong>3</strong><div><h3>Войдите через ABC4RD ID</h3><p>Приложение откроет защищённую форму входа в браузере. Используйте тот же аккаунт PILOT-001.</p></div></article>
+      <article><strong>4</strong><div><h3>Разрешите уведомления и звонки</h3><p>Разрешите уведомления, микрофон и камеру. Файлы ограничены 25 МБ.</p></div></article>
+    </section>
+
+    <section class="mobile-actions">
+      <div><h3>Passkey</h3><p>Создайте ключ входа на телефоне, чтобы дальше подтверждать вход через Face ID, Touch ID или защиту устройства.</p><a class="button" href="{{ identity_security_url }}">Настроить passkey</a></div>
+      <div><h3>Веб-версия</h3><p>Если приложение ещё не установлено, откройте тот же мессенджер в браузере.</p><a class="button secondary" href="{{ messenger_url }}">Открыть Element</a></div>
+    </section>
+
+    <section class="mobile-note">
+      <h3>Что проверим утром</h3>
+      <p>Вход, уведомления, отправку файла, фото, аудио и видео. Настоящий звонок требует второго ABC4RD ID: один аккаунт не может позвонить самому себе.</p>
+    </section>
+  </main>
+</body>
+</html>

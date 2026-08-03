@@ -1,0 +1,20 @@
+[Unit]
+Description=ABC4RD pilot identity, course and CRM reconciliation
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=ubuntu
+Group=ubuntu
+SupplementaryGroups=docker
+Environment=ABC4RD_PORTAL_STATE=/opt/abc4rd/portal/data/state.json
+ExecStart=/usr/bin/python3 /opt/abc4rd/integration/abc4rd-pilot-sync.py
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+ReadWritePaths=/opt/abc4rd/portal/data
+

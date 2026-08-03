@@ -1,0 +1,142 @@
+name: abc4rd-matrix
+
+services:
+  db:
+    image: postgres:17.10-alpine
+    container_name: abc4rd-matrix-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: synapse
+      POSTGRES_USER: synapse
+      POSTGRES_PASSWORD: ${ABC4RD_MATRIX_DB_PASSWORD:?required}
+      POSTGRES_INITDB_ARGS: --encoding=UTF8 --locale=C
+    volumes:
+      - ./postgres:/var/lib/postgresql/data
+    networks:
+      - matrix
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U synapse -d synapse"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    security_opt:
+      - no-new-privileges:true
+
+  synapse:
+    image: ghcr.io/element-hq/synapse:v1.157.0
+    container_name: abc4rd-synapse
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./data:/data
+      - ./config/homeserver.yaml:/data/homeserver.yaml:ro
+    networks:
+      - matrix
+      - academy
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'import urllib.request; urllib.request.urlopen(\"http://127.0.0.1:8008/health\",timeout=3)' "]
+      interval: 30s
+      timeout: 5s
+      retries: 8
+      start_period: 30s
+    security_opt:
+      - no-new-privileges:true
+
+  element:
+    image: vectorim/element-web:v1.12.22
+    container_name: abc4rd-element
+    restart: unless-stopped
+    volumes:
+      - ./config/element-config.json:/app/config.json:ro
+      - ./config/branding:/app/branding:ro
+    networks:
+      - academy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:80/config.json"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - SETGID
+      - SETUID
+
+  rtc-redis:
+    image: redis:8.2-alpine
+    container_name: abc4rd-rtc-redis
+    restart: unless-stopped
+    command: ["redis-server", "--save", "60", "1", "--loglevel", "warning"]
+    volumes:
+      - ./rtc-redis:/data
+    networks:
+      - rtc
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    security_opt:
+      - no-new-privileges:true
+
+  livekit:
+    image: livekit/livekit-server:v1.13.5
+    container_name: abc4rd-livekit
+    restart: unless-stopped
+    depends_on:
+      rtc-redis:
+        condition: service_healthy
+    command: ["--config", "/etc/livekit.yaml"]
+    volumes:
+      - ./config/livekit.yaml:/etc/livekit.yaml:ro
+    ports:
+      - "7881:7881/tcp"
+      - "7882:7882/udp"
+    networks:
+      - rtc
+      - academy
+    security_opt:
+      - no-new-privileges:true
+
+  lk-jwt:
+    image: ghcr.io/element-hq/lk-jwt-service:0.5.0
+    container_name: abc4rd-lk-jwt
+    restart: unless-stopped
+    depends_on:
+      rtc-redis:
+        condition: service_healthy
+      livekit:
+        condition: service_started
+    environment:
+      LIVEKIT_URL: wss://matrix.abc4rd.org/livekit/sfu
+      LIVEKIT_KEY: ${ABC4RD_LIVEKIT_KEY:?required}
+      LIVEKIT_SECRET: ${ABC4RD_LIVEKIT_SECRET:?required}
+      LIVEKIT_FULL_ACCESS_HOMESERVERS: abc4rd.org
+      SSL_CERT_FILE: /etc/ssl/certs/abc4rd-caddy-root.crt
+    extra_hosts:
+      - "abc4rd.org:51.68.130.137"
+    volumes:
+      - /opt/abc4rd/tutor/data/caddy/caddy/pki/authorities/local/root.crt:/etc/ssl/certs/abc4rd-caddy-root.crt:ro
+    networks:
+      - rtc
+      - academy
+    security_opt:
+      - no-new-privileges:true
+
+networks:
+  matrix:
+    name: abc4rd-matrix-internal
+    internal: true
+  academy:
+    external: true
+    name: tutor_local_default
+  rtc:
+    name: abc4rd-rtc-internal
+    internal: true

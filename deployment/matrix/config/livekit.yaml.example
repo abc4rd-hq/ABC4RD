@@ -1,0 +1,22 @@
+port: 7880
+
+logging:
+  level: info
+
+redis:
+  address: abc4rd-rtc-redis:6379
+
+rtc:
+  tcp_port: 7881
+  udp_port: 7882
+  use_external_ip: false
+  node_ip: 51.68.130.137
+
+keys:
+  "__LIVEKIT_KEY__": "__LIVEKIT_SECRET__"
+
+room:
+  auto_create: false
+  empty_timeout: 300
+  departure_timeout: 30
+  max_participants: 20

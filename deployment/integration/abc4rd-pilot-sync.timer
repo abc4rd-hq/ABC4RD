@@ -1,0 +1,14 @@
+[Unit]
+Description=Run ABC4RD pilot reconciliation every minute
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=1min
+RandomizedDelaySec=10s
+AccuracySec=5s
+Persistent=true
+Unit=abc4rd-pilot-sync.service
+
+[Install]
+WantedBy=timers.target
+

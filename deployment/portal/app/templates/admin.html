@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#070b14">
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  <title>ABC4RD - Администрирование</title>
+  <link rel="stylesheet" href="/static/portal.css?v=6ac2aa4">
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <a class="brand" href="/"><span class="brand-mark">◇</span><span>ABC4RD</span></a>
+      <nav>
+        <a class="active" href="/"><span>⌂</span>Пульт</a>
+        <a href="{{ academy_url }}"><span>▣</span>Академия</a>
+        <a href="{{ studio_url }}"><span>✦</span>Studio</a>
+        <a href="{{ crm_url }}"><span>⌁</span>CRM</a>
+        <a href="{{ messenger_url }}"><span>◌</span>Чаты</a>
+      </nav>
+      <div class="sidebar-note">Системный доступ<br><strong>ABC4RD Administrator</strong></div>
+    </aside>
+
+    <main>
+      <header>
+        <div>
+          <p class="eyebrow">ЦЕНТР УПРАВЛЕНИЯ</p>
+          <h1>Добро пожаловать, {{ admin_name }}</h1>
+        </div>
+        <div class="identity"><span class="status-dot"></span>полный администратор</div>
+      </header>
+
+      <section class="hero">
+        <div>
+          <p class="eyebrow">ABC4RD ADMIN</p>
+          <h2>Вся платформа в одном месте</h2>
+          <p>Управление обучением, контентом, участниками, коммуникациями, почтой и единым входом.</p>
+        </div>
+        <div class="score">6<span>систем</span></div>
+      </section>
+
+      <section class="grid">
+        <article class="card">
+          <div class="icon violet">▣</div>
+          <p class="eyebrow">ACADEMY</p>
+          <h3>Обучение и участники</h3>
+          <p>Просмотр курсов и административные функции Open edX.</p>
+          <a class="button secondary" href="{{ academy_url }}">Открыть Академию</a>
+        </article>
+
+        <article class="card">
+          <div class="icon cyan">✦</div>
+          <p class="eyebrow">STUDIO</p>
+          <h3>Курсы и материалы</h3>
+          <p>Создание, редактирование и публикация учебного контента.</p>
+          <a class="button secondary" href="{{ studio_url }}">Открыть Studio</a>
+        </article>
+
+        <article class="card">
+          <div class="icon amber">⌁</div>
+          <p class="eyebrow">CRM</p>
+          <h3>Операционное управление</h3>
+          <p>Участники, обращения, проекты и административные процессы.</p>
+          <a class="button secondary" href="{{ crm_url }}">Открыть CRM</a>
+        </article>
+
+        <article class="card">
+          <div class="icon cyan">◌</div>
+          <p class="eyebrow">MESSENGER</p>
+          <h3>Команды и сообщества</h3>
+          <p>Личные и групповые чаты, файлы, аудио- и видеозвонки.</p>
+          <a class="button secondary" href="{{ messenger_url }}">Открыть мессенджер</a>
+        </article>
+
+        <article class="card">
+          <div class="icon violet">@</div>
+          <p class="eyebrow">MAILCOW</p>
+          <h3>Почта abc4rd.org</h3>
+          <p>Управление ящиками и адресами домена ABC4RD.</p>
+          <a class="button secondary" href="{{ mail_admin_url }}">Управлять почтой</a>
+        </article>
+
+        <article class="card">
+          <div class="icon amber">◇</div>
+          <p class="eyebrow">IDENTITY</p>
+          <h3>Аккаунт и безопасность</h3>
+          <p>Пароль, двухфакторная защита, passkey и активные сессии.</p>
+          <a class="button secondary" href="{{ identity_url }}">Настроить безопасность</a>
+        </article>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

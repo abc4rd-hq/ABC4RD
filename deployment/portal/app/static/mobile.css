@@ -1,0 +1,132 @@
+.mobile-guide {
+  max-width: 980px;
+  padding: 34px 22px 70px;
+}
+
+.mobile-hero,
+.mobile-actions,
+.mobile-note {
+  border: 1px solid var(--line);
+  background: linear-gradient(145deg, rgba(23, 38, 65, 0.96), rgba(13, 24, 43, 0.96));
+  border-radius: 20px;
+  padding: 26px;
+}
+
+.mobile-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.mobile-hero h2 {
+  margin: 15px 0 8px;
+}
+
+.mobile-hero p,
+.setup-steps p,
+.mobile-actions p,
+.mobile-note p {
+  color: var(--muted);
+  margin-bottom: 0;
+}
+
+.server-address {
+  min-width: 300px;
+  padding: 15px;
+  border: 1px solid rgba(34, 211, 238, 0.22);
+  border-radius: 13px;
+  background: rgba(34, 211, 238, 0.07);
+}
+
+.server-address small {
+  display: block;
+  color: var(--muted);
+  margin-bottom: 7px;
+}
+
+.server-address code,
+.setup-steps code {
+  color: #a5f3fc;
+  overflow-wrap: anywhere;
+}
+
+.setup-steps {
+  display: grid;
+  gap: 13px;
+  margin: 18px 0;
+}
+
+.setup-steps article {
+  display: flex;
+  gap: 18px;
+  padding: 20px 22px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(17, 29, 51, 0.9);
+}
+
+.setup-steps strong {
+  display: grid;
+  flex: 0 0 38px;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border-radius: 50%;
+  color: #ddd6fe;
+  background: rgba(139, 92, 246, 0.2);
+}
+
+.setup-steps h3,
+.mobile-actions h3,
+.mobile-note h3 {
+  margin-bottom: 6px;
+}
+
+.mobile-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.mobile-actions > div:first-child {
+  border-right: 1px solid var(--line);
+  padding-right: 18px;
+}
+
+.mobile-actions .button {
+  margin-top: 18px;
+}
+
+.mobile-note {
+  margin-top: 18px;
+  border-color: rgba(251, 191, 36, 0.25);
+  background: rgba(251, 191, 36, 0.07);
+}
+
+@media (max-width: 700px) {
+  .mobile-guide {
+    padding: 22px 15px 50px;
+  }
+
+  .mobile-guide header,
+  .mobile-hero {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .server-address {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .mobile-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .mobile-actions > div:first-child {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+    padding: 0 0 20px;
+  }
+}

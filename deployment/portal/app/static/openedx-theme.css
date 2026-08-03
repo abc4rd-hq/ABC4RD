@@ -1,0 +1,221 @@
+@import url("https://cdn.jsdelivr.net/gh/edly-io/brand-openedx@7c2bc5caf96daa62d9fef4b2f3a7a59b8479ee9f/dist/dark.min.css");
+
+:root {
+  color-scheme: dark;
+  --abc4rd-canvas: #08090d;
+  --abc4rd-surface: #10131a;
+  --abc4rd-surface-raised: #171b25;
+  --abc4rd-border: rgba(255, 255, 255, 0.12);
+  --abc4rd-text: #f7f8fb;
+  --abc4rd-muted: #aab2c2;
+  --abc4rd-accent: #8d7dff;
+  --abc4rd-accent-strong: #6f5cff;
+  --abc4rd-focus: #bdb4ff;
+  --pgn-color-body-bg: var(--abc4rd-canvas);
+  --pgn-color-header-bg: rgba(8, 9, 13, 0.94);
+  --pgn-color-bg-base: var(--abc4rd-surface);
+  --pgn-color-bg-light-overlay: var(--abc4rd-surface-raised);
+  --pgn-color-text-base: var(--abc4rd-text);
+  --pgn-color-text-primary: var(--abc4rd-text);
+  --pgn-color-primary-base: var(--abc4rd-accent);
+  --pgn-color-primary-500: var(--abc4rd-accent);
+  --pgn-color-primary-700: var(--abc4rd-accent-strong);
+  --pgn-color-brand-base: var(--abc4rd-accent);
+}
+
+html,
+body,
+#root {
+  background: var(--abc4rd-canvas) !important;
+  color: var(--abc4rd-text) !important;
+}
+
+body,
+button,
+input,
+select,
+textarea {
+  font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+}
+
+main {
+  background:
+    radial-gradient(circle at 88% 3%, rgba(111, 92, 255, 0.15), transparent 28rem),
+    var(--abc4rd-canvas) !important;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.pgn__card h1,
+.pgn__card h2,
+.pgn__card h3,
+.pgn__card h4,
+.pgn__card h5,
+.pgn__card h6 {
+  color: var(--abc4rd-text) !important;
+  letter-spacing: -0.025em;
+}
+
+.pgn__card h1 a,
+.pgn__card h2 a,
+.pgn__card h3 a,
+.pgn__card h4 a,
+.pgn__card h5 a,
+.pgn__card h6 a {
+  color: var(--abc4rd-text) !important;
+}
+
+p,
+small,
+.text-muted {
+  color: var(--abc4rd-muted) !important;
+}
+
+a {
+  color: #bdb4ff;
+}
+
+a:hover,
+a:focus-visible {
+  color: #ddd8ff;
+}
+
+.site-header-desktop,
+.site-header-mobile,
+header {
+  background: rgba(8, 9, 13, 0.94) !important;
+  border-color: var(--abc4rd-border) !important;
+  color: var(--abc4rd-text) !important;
+}
+
+.site-header-desktop a,
+.site-header-mobile a,
+header a,
+header button {
+  color: var(--abc4rd-text) !important;
+}
+
+.pgn__card,
+.card,
+.course-card {
+  background: linear-gradient(145deg, rgba(23, 27, 37, 0.98), rgba(13, 15, 21, 0.98)) !important;
+  border: 1px solid var(--abc4rd-border) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 18px 54px rgba(0, 0, 0, 0.3) !important;
+  color: var(--abc4rd-text) !important;
+  overflow: hidden;
+}
+
+.pgn__card-header,
+.pgn__card-body,
+.pgn__card-footer,
+.pgn__card-header-content,
+.pgn__card-header-title-md {
+  color: var(--abc4rd-text) !important;
+}
+
+a[href*="course-v1:ABC4RD+0001+2026"].pgn__card-wrapper-image-cap {
+  align-items: center;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(141, 125, 255, 0.72), transparent 38%),
+    linear-gradient(145deg, #171b2a, #090b12) !important;
+  display: flex !important;
+  justify-content: center;
+  min-height: 220px;
+  min-width: 235px;
+  position: relative;
+}
+
+a[href*="course-v1:ABC4RD+0001+2026"].pgn__card-wrapper-image-cap img {
+  opacity: 0;
+}
+
+a[href*="course-v1:ABC4RD+0001+2026"].pgn__card-wrapper-image-cap::before {
+  color: #dcd7ff;
+  content: "◇";
+  font-size: 64px;
+  line-height: 1;
+  text-shadow: 0 0 28px rgba(141, 125, 255, 0.55);
+}
+
+a[href*="course-v1:ABC4RD+0001+2026"].pgn__card-wrapper-image-cap::after {
+  bottom: 24px;
+  color: rgba(247, 248, 251, 0.72);
+  content: "ABC4RD · 0001";
+  font-size: 12px;
+  font-weight: 700;
+  left: 0;
+  letter-spacing: 0.16em;
+  position: absolute;
+  right: 0;
+  text-align: center;
+}
+
+.btn,
+button {
+  border-radius: 12px !important;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--abc4rd-accent), var(--abc4rd-accent-strong)) !important;
+  border-color: transparent !important;
+  color: #fff !important;
+  box-shadow: 0 10px 28px rgba(111, 92, 255, 0.25);
+}
+
+.btn-outline-primary,
+.btn-outline-dark {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border-color: rgba(189, 180, 255, 0.6) !important;
+  color: var(--abc4rd-text) !important;
+}
+
+.dropdown-menu,
+.modal-content,
+.popover {
+  background: var(--abc4rd-surface-raised) !important;
+  border-color: var(--abc4rd-border) !important;
+  color: var(--abc4rd-text) !important;
+}
+
+input,
+select,
+textarea,
+.form-control {
+  background: rgba(255, 255, 255, 0.055) !important;
+  border-color: var(--abc4rd-border) !important;
+  color: var(--abc4rd-text) !important;
+}
+
+footer.footer,
+footer {
+  background: #0b0d12 !important;
+  border-color: var(--abc4rd-border) !important;
+  color: var(--abc4rd-muted) !important;
+}
+
+:focus-visible {
+  outline: 3px solid var(--abc4rd-focus) !important;
+  outline-offset: 3px;
+}
+
+@media (max-width: 767.98px) {
+  .pgn__card,
+  .card,
+  .course-card {
+    border-radius: 14px !important;
+  }
+
+  main {
+    background: var(--abc4rd-canvas) !important;
+  }
+
+  a[href*="course-v1:ABC4RD+0001+2026"].pgn__card-wrapper-image-cap {
+    min-height: 150px;
+    min-width: 100%;
+  }
+}

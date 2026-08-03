@@ -1,0 +1,105 @@
+server_name: "abc4rd.org"
+public_baseurl: "https://matrix.abc4rd.org/"
+pid_file: /data/homeserver.pid
+web_client_location: "https://chat.abc4rd.org/"
+
+listeners:
+  - port: 8008
+    tls: false
+    type: http
+    x_forwarded: true
+    bind_addresses: ["0.0.0.0"]
+    resources:
+      - names: [client, federation]
+        compress: false
+
+database:
+  name: psycopg2
+  args:
+    user: synapse
+    password: "__DB_PASSWORD__"
+    database: synapse
+    host: abc4rd-matrix-db
+    port: 5432
+    cp_min: 5
+    cp_max: 10
+
+log_config: "/data/abc4rd.org.log.config"
+media_store_path: /data/media_store
+max_upload_size: "25M"
+signing_key_path: "/data/abc4rd.org.signing.key"
+trusted_key_servers:
+  - server_name: "matrix.org"
+suppress_key_server_warning: true
+report_stats: false
+
+url_preview_enabled: true
+url_preview_ip_range_blacklist:
+  - "127.0.0.0/8"
+  - "10.0.0.0/8"
+  - "172.16.0.0/12"
+  - "192.168.0.0/16"
+  - "100.64.0.0/10"
+  - "192.0.0.0/24"
+  - "169.254.0.0/16"
+  - "192.88.99.0/24"
+  - "198.18.0.0/15"
+  - "192.0.2.0/24"
+  - "198.51.100.0/24"
+  - "203.0.113.0/24"
+  - "224.0.0.0/4"
+  - "::1/128"
+  - "fe80::/10"
+  - "fc00::/7"
+  - "2001:db8::/32"
+  - "ff00::/8"
+  - "fec0::/10"
+
+experimental_features:
+  msc3266_enabled: true
+  msc4143_enabled: true
+  msc4222_enabled: true
+max_event_delay_duration: "24h"
+rc_message:
+  per_second: 0.5
+  burst_count: 30
+rc_delayed_event_mgmt:
+  per_second: 1
+  burst_count: 20
+matrix_rtc:
+  transports:
+    - type: "livekit"
+      livekit_service_url: "https://matrix.abc4rd.org/livekit/jwt"
+
+enable_registration: false
+enable_registration_without_verification: false
+password_config:
+  enabled: false
+allow_public_rooms_without_auth: false
+allow_public_rooms_over_federation: false
+allow_guest_access: false
+autocreate_auto_join_rooms: true
+autocreate_auto_join_room_preset: "private_chat"
+auto_join_mxid_localpart: "pilot_001"
+auto_join_rooms:
+  - "#pilot:abc4rd.org"
+
+macaroon_secret_key: "__MACAROON_SECRET__"
+form_secret: "__FORM_SECRET__"
+
+oidc_providers:
+  - idp_id: keycloak
+    idp_name: "ABC4RD ID"
+    issuer: "https://id.abc4rd.org/realms/abc4rd"
+    client_id: "abc4rd-synapse"
+    client_secret: "__OIDC_CLIENT_SECRET__"
+    scopes: ["openid", "profile", "email"]
+    discover: true
+    skip_verification: false
+    backchannel_logout_enabled: true
+    user_mapping_provider:
+      config:
+        localpart_template: "{{ user.preferred_username }}"
+        display_name_template: "{{ user.preferred_username }}"
+
+federation_domain_whitelist: []
