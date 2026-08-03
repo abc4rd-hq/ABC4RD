@@ -4,6 +4,8 @@ set -uo pipefail
 failures=()
 checked_containers=0
 checked_http=0
+checked_tls=0
+tls_min_days=99999
 backup_age_hours=unknown
 
 check_container() {
@@ -42,6 +44,28 @@ check_redirect() {
   fi
 }
 
+check_tls() {
+  local label="$1"
+  local host="$2"
+  local end_date expiry_epoch remaining_seconds remaining_days
+  checked_tls=$((checked_tls + 1))
+  end_date="$(
+    timeout 15 openssl s_client -connect "${host}:443" -servername "$host" </dev/null 2>/dev/null \
+      | openssl x509 -noout -enddate 2>/dev/null \
+      | sed 's/^notAfter=//'
+  )"
+  expiry_epoch="$(date --date="$end_date" +%s 2>/dev/null || printf '0')"
+  if [[ -z "$end_date" || "$expiry_epoch" == "0" ]]; then
+    failures+=("tls:$label:unreadable")
+    return
+  fi
+  remaining_seconds=$(( expiry_epoch - $(date +%s) ))
+  remaining_days=$(( remaining_seconds / 86400 ))
+  (( remaining_days < tls_min_days )) && tls_min_days=$remaining_days
+  (( remaining_seconds >= 1209600 )) \
+    || failures+=("tls:$label:expires-in-${remaining_days}d")
+}
+
 for container in \
   abc4rd-academy-core \
   abc4rd-keycloak \
@@ -71,6 +95,17 @@ check_http messenger "https://chat.abc4rd.org/config.json" "200"
 check_http matrix "https://matrix.abc4rd.org/_matrix/client/versions" "200"
 check_http matrix-discovery "https://matrix.abc4rd.org/.well-known/matrix/client" "200"
 check_http matrix-rtc-auth "https://matrix.abc4rd.org/livekit/jwt/healthz" "200"
+
+check_tls academy learn.abc4rd.org
+check_tls studio studio.abc4rd.org
+check_tls identity id.abc4rd.org
+check_tls crm crm.abc4rd.org
+check_tls portal app.abc4rd.org
+check_tls verification verify.abc4rd.org
+check_tls library library.abc4rd.org
+check_tls messenger chat.abc4rd.org
+check_tls matrix matrix.abc4rd.org
+[[ "$tls_min_days" != "99999" ]] || tls_min_days=unknown
 
 if ! docker exec abc4rd-portal curl -fsS http://127.0.0.1:8080/mobile 2>/dev/null \
   | grep -Fq 'https://matrix.abc4rd.org'; then
@@ -129,6 +164,6 @@ if (( ${#failures[@]} > 0 )); then
   exit 1
 fi
 
-printf 'ABC4RD_HEALTH OK at=%s containers=%d http=%d participants=%s certificates=%s backup_age=%sh\n' \
-  "$timestamp" "$checked_containers" "$checked_http" "$participant_count" \
-  "$certificate_count" "$backup_age_hours"
+printf 'ABC4RD_HEALTH OK at=%s containers=%d http=%d tls=%d tls_min=%sd participants=%s certificates=%s backup_age=%sh\n' \
+  "$timestamp" "$checked_containers" "$checked_http" "$checked_tls" \
+  "$tls_min_days" "$participant_count" "$certificate_count" "$backup_age_hours"

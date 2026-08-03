@@ -5,6 +5,8 @@ the Keycloak redirect for both the portal and mobile guide, the internal mobile
 guide marker, LiveKit ports, the reconciliation timer, recent participant state
 and at least one generated pilot certificate. It also requires a runtime backup
 newer than seven days and verifies the encrypted file against its SHA-256 sidecar.
+All nine public ABC4RD service certificates are checked as served, and the monitor
+fails before any of them reaches the final fourteen days of validity.
 The systemd timer runs every five minutes and writes one compact result to the
 journal.
 
